@@ -1,0 +1,127 @@
+"use client";
+
+import { SearchIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useFilterNavigation } from "@/components/filter-navigation";
+import { COUNTRIES, SOURCES, WORK_MODES, normalizeQuery } from "@/lib/filters";
+import { COUNTRY_LABELS, SOURCE_LABELS, WORK_MODE_LABELS } from "@/lib/labels";
+
+const SEARCH_DEBOUNCE_MS = 300;
+
+export function Filters() {
+  const { filters, navigate } = useFilterNavigation();
+  return (
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+      <SearchBox />
+      <FilterSelect
+        label="Country"
+        allLabel="All countries"
+        value={filters.country}
+        options={COUNTRIES.map((value) => ({ value, label: COUNTRY_LABELS[value] }))}
+        onChange={(country) => navigate({ country })}
+      />
+      <FilterSelect
+        label="Work mode"
+        allLabel="All work modes"
+        value={filters.workMode}
+        options={WORK_MODES.map((value) => ({ value, label: WORK_MODE_LABELS[value] }))}
+        onChange={(workMode) => navigate({ workMode })}
+      />
+      <FilterSelect
+        label="Source"
+        allLabel="All sources"
+        value={filters.source}
+        options={SOURCES.map((value) => ({ value, label: SOURCE_LABELS[value] }))}
+        onChange={(source) => navigate({ source })}
+      />
+    </div>
+  );
+}
+
+function SearchBox() {
+  const { filters, navigate } = useFilterNavigation();
+  const q = filters.q;
+  const [text, setText] = useState(q ?? "");
+  const [shownQ, setShownQ] = useState(q); // the URL value the box last saw
+  const [sentQ, setSentQ] = useState(q); // the value this box last put in the URL
+
+  // The URL changed without this box (a reset link, a shared link): show the new value.
+  if (q !== shownQ) {
+    setShownQ(q);
+    if (q !== sentQ) setText(q ?? "");
+  }
+
+  useEffect(() => {
+    const next = normalizeQuery(text); // under 2 characters means no search
+    if (next === q) return;
+    const timer = setTimeout(() => {
+      setSentQ(next);
+      navigate({ q: next });
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [text, q, navigate]);
+
+  return (
+    <div className="relative w-full sm:w-72">
+      <SearchIcon
+        aria-hidden
+        className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+      />
+      <Input
+        type="search"
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        placeholder="Search role or company"
+        aria-label="Search role or company"
+        className="pl-8"
+      />
+    </div>
+  );
+}
+
+const ALL = "all";
+
+type FilterSelectProps<T extends string> = {
+  label: string;
+  allLabel: string;
+  value: T | undefined;
+  options: { value: T; label: string }[];
+  onChange: (value: T | undefined) => void;
+};
+
+function FilterSelect<T extends string>({
+  label,
+  allLabel,
+  value,
+  options,
+  onChange,
+}: FilterSelectProps<T>) {
+  const items = [{ value: ALL, label: allLabel }, ...options];
+  return (
+    <Select
+      items={items}
+      value={value ?? ALL}
+      onValueChange={(selected) => onChange(options.find((o) => o.value === selected)?.value)}
+    >
+      <SelectTrigger aria-label={label} className="w-full sm:w-40">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {items.map((item) => (
+          <SelectItem key={item.value} value={item.value}>
+            {item.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}

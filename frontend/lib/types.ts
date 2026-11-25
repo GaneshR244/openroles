@@ -1,0 +1,71 @@
+// API contract between the NestJS backend and this app (docs/ARCHITECTURE.md §3.13).
+// The backend's responses must match these shapes exactly.
+
+export type Country = "IN" | "AE" | "US";
+export type WorkMode = "ONSITE" | "HYBRID" | "REMOTE" | "UNKNOWN";
+export type JobSource =
+  | "LINKEDIN"
+  | "GREENHOUSE"
+  | "LEVER"
+  | "ASHBY"
+  | "SMARTRECRUITERS"
+  | "WORKABLE";
+export type View = "new" | "week" | "all";
+export type RunStatus = "RUNNING" | "SUCCESS" | "PARTIAL" | "FAILED";
+
+export type JobFilters = {
+  view: View;
+  country?: Country;
+  workMode?: Exclude<WorkMode, "UNKNOWN">;
+  source?: JobSource;
+  /** At least 2 characters; matches job title or company name. */
+  q?: string;
+  page: number;
+  pageSize: number;
+};
+
+export type JobItem = {
+  id: string;
+  title: string;
+  company: { id: string; name: string };
+  location: string | null;
+  country: Country | null;
+  workMode: WorkMode;
+  url: string;
+  source: JobSource;
+  /** ISO date-time strings (UTC). */
+  postedAt: string;
+  firstSeenAt: string;
+};
+
+export type Paged<T> = {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export type CompanyItem = {
+  id: string;
+  name: string;
+  linkedinUrl: string | null;
+  openRoles: number;
+  newToday: number;
+  latestPostedAt: string | null;
+  sources: JobSource[];
+};
+
+export type RunSummary = {
+  /** Last finished run, or null if none has finished yet. */
+  lastRun: {
+    id: string;
+    status: RunStatus;
+    startedAt: string;
+    finishedAt: string | null;
+    newJobs: number;
+    newCompanies: number;
+  } | null;
+  isRunning: boolean;
+  /** Live counts for today (IST): roles first seen today and the companies they belong to. */
+  today: { newJobs: number; companies: number };
+};
