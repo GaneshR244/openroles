@@ -65,6 +65,25 @@ On Kubernetes, use a CronJob with `concurrencyPolicy: Forbid`. A second run star
 - `npm run jobs:fetch -- --source=lever` runs one board system only.
 - `npm run seed:yc -- --find-boards=N` probes N companies for boards right away. The daily run checks `MAX_COMPANY_PROBES` companies each morning.
 
+## Daily schedule on this Mac (until there is a server)
+
+`backend/deploy/com.openroles.fetch-jobs.plist` runs the fetch every day at 06:00 IST using macOS's scheduler. If the Mac is asleep then, it runs once on wake. Run `npm run build` in `backend/` first.
+
+```bash
+# switch on
+mkdir -p ~/projects/openroles/backend/logs
+cp ~/projects/openroles/backend/deploy/com.openroles.fetch-jobs.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.openroles.fetch-jobs.plist
+
+# check / see the last run
+launchctl print gui/$(id -u)/com.openroles.fetch-jobs | grep -E "state|last exit"
+tail -20 ~/projects/openroles/backend/logs/fetch-jobs.log
+
+# switch off
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.openroles.fetch-jobs.plist
+rm ~/Library/LaunchAgents/com.openroles.fetch-jobs.plist
+```
+
 ## Scripts
 
 | Where | Command | What |
