@@ -37,7 +37,15 @@ const boards = (over: Partial<BoardLaneStats> = {}): BoardLaneStats => ({
 });
 const base = (b: BoardLaneStats) => ({
   window: { since: '', seconds: 0 },
-  linkedin: { enabled: false, requests: 0, cards: 0, new: 0, saturated: [], blocked: false },
+  linkedin: {
+    enabled: false,
+    requests: 0,
+    cards: 0,
+    new: 0,
+    saturated: [],
+    blocked: false,
+    errors: 0,
+  },
   boards: b,
   boardsSecondPass: null,
   finder: null,

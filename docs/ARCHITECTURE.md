@@ -45,6 +45,17 @@ These override older wording below where they differ.
   - `lib/api.ts` is `server-only`.
   - `OPENROLES_SAMPLE_DATA=1` shows made-up data in dev only; production builds ignore it.
 
+## As built: LinkedIn lane (phase 10, 25 Nov 2026)
+- **Status:** approved by the user and switched on (`LINKEDIN_ENABLED=true`).
+- **Parser:** `sources/linkedin.parser.ts` (cheerio). Selectors were verified live.
+  - A non-empty page with no job cards (LinkedIn's bot-check script) counts as **blocked**: the lane stops for the day and never tries to get around it. An empty body means the end of results.
+- **Lane:** `linkedin-lane.service.ts`.
+  - **Budget:** split fairly, `floor(budget / searches)` pages per city in pass 1, then leftover requests in priority order.
+  - **Paging:** `start` moves forward by the cards returned. A 400 past the first page ends that search.
+  - **Duplicates and saving:** a run-level Set skips postings already seen in another city. Jobs are saved every 100 cards with the search's country.
+  - **Limits:** at 1,000 results a search is marked saturated.
+  - **Running:** it runs in parallel with the board lane. LinkedIn retries a 429 only once, then stops.
+
 ## 0. Scope
 
 **In scope (v1)**
@@ -551,7 +562,7 @@ No job source needs an API key.
 
 ## 5. Cron and deployment
 - **Local:**
-  - `docker-compose.yml` with `postgres:16`, backend and frontend
+  - The developer's own PostgreSQL 16 (the one pgAdmin connects to); no Docker needed
   - `npm run jobs:fetch:dev -- --source=lever` runs one source
 - **Backend image:** a multi-stage Dockerfile. The same image runs the API (`node dist/main.js`) and the script (`node dist/scripts/fetch-jobs.js`). `prisma migrate deploy` runs on release.
 - **Cron:** `30 0 * * *` (UTC) = 06:00 IST, running `npm run jobs:fetch`. It needs an always-on host:
@@ -593,7 +604,7 @@ No job source needs an API key.
 - **Acceptance:** run `jobs:fetch` twice; the second run inserts 0 jobs.
 
 ## 9. Build phases (stop for review after each)
-1. **Repo + backend skeleton:** Nest, config validation, Prisma schema, migrations (including the extra SQL), docker-compose.
+1. **Repo + backend skeleton:** Nest, config validation, Prisma schema, migrations (including the extra SQL).
 2. **Pipeline helpers:** `normalize.ts`, `country.ts`, `work-mode.ts`, `filter.ts`, with unit tests.
 3. **HTTP client and readers:** limiter, retry, breaker, plus the five board readers with zod schemas and fixture tests.
 4. **Job store:** batch dedupe, company upsert, touch, insert, close, guards, with integration tests.

@@ -1,6 +1,10 @@
 import type { TestingModule } from '@nestjs/testing';
 import { BoardLaneService } from '../src/ingestion/board-lane.service.js';
 import { BoardFinderService } from '../src/ingestion/board-finder.service.js';
+import {
+  LinkedInLaneService,
+  disabledLinkedInStats,
+} from '../src/ingestion/linkedin-lane.service.js';
 import { JobStoreService } from '../src/ingestion/job-store.service.js';
 import { RetentionService } from '../src/ingestion/retention.service.js';
 import { ReporterService } from '../src/ingestion/reporter.service.js';
@@ -49,6 +53,7 @@ describe('RunOrchestratorService (integration, real PostgreSQL)', () => {
       ReporterService,
       { provide: BoardReaders, useValue: readers },
       { provide: BoardFinderService, useValue: finder },
+      { provide: LinkedInLaneService, useValue: { run: async () => disabledLinkedInStats() } },
     ]);
     orchestrator = moduleRef.get(RunOrchestratorService);
     prisma = moduleRef.get(PrismaService);

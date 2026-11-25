@@ -6,6 +6,11 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { type AppConfig, setting } from '../config/app-config.js';
 import { BoardLaneService, type BoardLaneStats } from './board-lane.service.js';
 import { BoardFinderService } from './board-finder.service.js';
+import {
+  LinkedInLaneService,
+  disabledLinkedInStats,
+  type LinkedInStats,
+} from './linkedin-lane.service.js';
 import { RetentionService } from './retention.service.js';
 import { ReporterService } from './reporter.service.js';
 import { decideStatus, type RunStats } from './run-stats.js';
@@ -47,6 +52,7 @@ export class RunOrchestratorService {
     private readonly prisma: PrismaService,
     private readonly boardLane: BoardLaneService,
     private readonly finder: BoardFinderService,
+    private readonly linkedin: LinkedInLaneService,
     private readonly retention: RetentionService,
     private readonly reporter: ReporterService,
     config: ConfigService,
@@ -85,12 +91,22 @@ export class RunOrchestratorService {
       );
       const linkedinEnabled = setting(this.config, 'LINKEDIN_ENABLED') && !opts.only;
 
-      // Lanes run in parallel: they call different hosts. LinkedIn arrives in phase 10.
-      const [boardsResult] = await Promise.allSettled([
+      // Lanes run in parallel: they call different hosts.
+      const [boardsResult, linkedinResult] = await Promise.allSettled([
         this.boardLane.run({ now: startedAt, deadline, only: opts.only }),
+        linkedinEnabled
+          ? this.linkedin.run({ now: startedAt, deadline, windowSeconds: seconds })
+          : Promise.resolve(disabledLinkedInStats()),
       ]);
       if (boardsResult.status === 'rejected') throw boardsResult.reason;
       const boards = boardsResult.value;
+      let linkedin: LinkedInStats;
+      if (linkedinResult.status === 'fulfilled') {
+        linkedin = linkedinResult.value;
+      } else {
+        this.logger.error(`linkedin lane failed: ${(linkedinResult.reason as Error)?.message}`);
+        linkedin = { ...disabledLinkedInStats(), enabled: true, errors: 1 };
+      }
 
       let finder = null;
       let boardsSecondPass: BoardLaneStats | null = null;
@@ -111,19 +127,15 @@ export class RunOrchestratorService {
       });
       const base = {
         window: { since: new Date(startedAt.getTime() - seconds * 1000).toISOString(), seconds },
-        linkedin: {
-          enabled: linkedinEnabled,
-          requests: 0,
-          cards: 0,
-          new: 0,
-          saturated: [],
-          blocked: false,
-        },
+        linkedin,
         boards,
         boardsSecondPass,
         finder,
         retention,
-        totals: { newJobs: boards.new + (boardsSecondPass?.new ?? 0), newCompanies },
+        totals: {
+          newJobs: boards.new + (boardsSecondPass?.new ?? 0) + linkedin.new,
+          newCompanies,
+        },
       };
       const { status, reasons } = decideStatus(base);
       const stats: RunStats = {

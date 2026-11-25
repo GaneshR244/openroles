@@ -12,7 +12,7 @@ An internal tool that shows Hyring's sales team which companies are hiring, for 
 ```
 cron 06:00 IST ──▶ backend fetch script ──▶ public job boards (no API keys)
                           │                  Greenhouse · Lever · Ashby · SmartRecruiters · Workable
-                          ▼                  (+ LinkedIn, switched off until approved)
+                          ▼                  + LinkedIn logged-out job search (20 cities)
                      PostgreSQL ◀── backend API (read-only, x-api-key) ◀── frontend (Next.js) ◀── sales team
 ```
 
@@ -81,7 +81,7 @@ On Kubernetes, use a CronJob with `concurrencyPolicy: Forbid`. A second run star
 All settings are in `backend/.env.example` and `frontend/.env.example`. None of the job sources needs an API key.
 - **`API_KEY`** is a secret you generate; it's shared by the frontend and backend, and the frontend uses it server-side only.
 - **`TARGET_COUNTRIES`** picks the markets (default `IN,AE,US`).
-- **`LINKEDIN_ENABLED`** stays `false` until the lead approves LinkedIn.
+- **`LINKEDIN_ENABLED=true`** reads LinkedIn's logged-out job search (approved). `LINKEDIN_MAX_REQUESTS` caps the requests per morning (default 300). The lane stops for the day if LinkedIn blocks us.
 
 ## Deploying (not done yet)
 

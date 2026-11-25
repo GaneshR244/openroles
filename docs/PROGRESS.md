@@ -95,10 +95,24 @@ Built in waves. Three agents worked in parallel on separate folders (pipeline he
 - **Workable is blocking this machine for about 24 hours** (HTTP 429, Retry-After 86081 s), triggered by the readers agent's testing. The client now stops calling a host that sends a long Retry-After, and the finder never probes Workable.
 - **Workable discovery is limited:** Workable boards are only read once added. The finder doesn't guess Workable slugs.
 
+## Phase 10: LinkedIn (done, 25 Nov 2026)
+Approved by the user. Built and switched on (`LINKEDIN_ENABLED=true`).
+- **Built:**
+  - `linkedin.parser.ts` (cheerio, selectors verified live)
+  - `linkedin-lane.service.ts`: fair-share budget across 20 cities, paging, a run-level seen set, saves every 100 cards, saturation flag, and stops for the day on a rate limit or bot-check page
+  - Wired into the orchestrator in parallel with the board lane
+- **Tests:** 13 unit tests (parser plus lane) and 1 integration test on PostgreSQL (saved once, company spellings merged, second run adds 0).
+  - backend totals: 323 unit, 36 integration and API tests, all passing.
+- **First real run** (budget 60 requests): PARTIAL in 4 min.
+  - LinkedIn made **23 requests and read 220 cards, saving 216 new jobs (149 India, 30 UAE, 37 US)** from **182 new companies**. Then LinkedIn blocked the laptop and the lane stopped cleanly. The board lane and the finder carried on.
+  - The board finder then found 6 boards for LinkedIn companies, adding 206 more roles (mostly India on SmartRecruiters).
+  - Run total: 422 new roles. Database check: 0 duplicate fingerprints, 0 duplicate source + job IDs.
+- **Now:** 582 roles first seen today at 221 companies (India 228, UAE 33, US 313). The sales page shows them; the UAE filter was checked.
+- **What to watch:** this laptop gets bot-checked after roughly 20–25 LinkedIn requests in one go, so a morning run will usually stop well before its 300-request budget, at about 200 jobs a day. If that holds, try slower pacing for LinkedIn (a longer gap in `host-policies.ts`). Never try to get around the block.
+
 ## Not done yet
-- **Phase 10, LinkedIn:** waiting for the lead's OK. `LINKEDIN_ENABLED=false`.
 - **Deployment and the production cron:** waiting for a hosting decision. The cron line is in the README.
-- **Sales login:** waiting for a decision. Suggestion: Google sign-in limited to the company domain.
+- **Sales login:** not wanted for now (user, 25 Nov 2026). The page is view-only.
 
 ## Running locally right now
 - **Sales page:** http://localhost:3000 · **API:** http://localhost:4000/api/health

@@ -11,6 +11,7 @@ import { BoardReaders } from './sources/board-readers.js';
 import { JobStoreService } from './job-store.service.js';
 import { BoardLaneService } from './board-lane.service.js';
 import { BoardFinderService } from './board-finder.service.js';
+import { LinkedInLaneService } from './linkedin-lane.service.js';
 import { RetentionService } from './retention.service.js';
 import { ReporterService } from './reporter.service.js';
 import { RunOrchestratorService } from './run-orchestrator.service.js';
@@ -31,6 +32,7 @@ import { YcImportService } from './yc-import.service.js';
     JobStoreService,
     BoardLaneService,
     BoardFinderService,
+    LinkedInLaneService,
     RetentionService,
     ReporterService,
     RunOrchestratorService,

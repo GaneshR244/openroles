@@ -1,19 +1,13 @@
 import type { RunStatus } from '../generated/prisma/enums.js';
 import type { BoardLaneStats } from './board-lane.service.js';
 import type { FinderStats } from './board-finder.service.js';
+import type { LinkedInStats } from './linkedin-lane.service.js';
 
 /** Shape of FetchRun.stats (docs/ARCHITECTURE.md §3.11). */
 export type RunStats = {
   durationMs: number;
   window: { since: string; seconds: number };
-  linkedin: {
-    enabled: boolean;
-    requests: number;
-    cards: number;
-    new: number;
-    saturated: string[];
-    blocked: boolean;
-  };
+  linkedin: LinkedInStats;
   boards: BoardLaneStats;
   boardsSecondPass: BoardLaneStats | null;
   finder: FinderStats | null;

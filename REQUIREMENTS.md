@@ -40,7 +40,7 @@ We do **not** collect job descriptions, years of experience, salary or skills. S
 
 ## Where the jobs come from
 
-- **LinkedIn.** The lead asked for it. LinkedIn's rules forbid scraping, so the lead must give a clear OK first.
+- **LinkedIn.** Approved on 25 Nov 2026. We read the public job search without logging in, at most 300 requests a morning, and stop for the day if LinkedIn blocks us.
 - **Public company job boards.** Tested and working:
   - Greenhouse
   - Lever
@@ -92,5 +92,5 @@ We do **not** collect job descriptions, years of experience, salary or skills. S
 ## Still open
 
 - **Where will the backend be hosted?** It needs an always-on server or container, because the morning run can take up to an hour.
-- **How do salespeople log in?** The page lists leads, so it shouldn't be public.
-- **LinkedIn:** does the lead OK reading LinkedIn's public job search, knowing LinkedIn's rules forbid scraping?
+- **Sales login:** not wanted for now (25 Nov 2026). The page only shows data.
+- ~~LinkedIn~~: **approved on 25 Nov 2026.** It reads the public job search while logged out, slowly, and stops when blocked.
