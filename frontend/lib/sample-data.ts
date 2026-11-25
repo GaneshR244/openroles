@@ -186,7 +186,6 @@ function filterJobs(jobs: JobItem[], filters: JobFilters, now: number): JobItem[
     if (filters.view === "week" && seen < today - 6 * DAY) return false;
     if (filters.view === "all" && Date.parse(job.postedAt) < now - 30 * DAY) return false;
     if (filters.country && job.country !== filters.country) return false;
-    if (filters.workMode && job.workMode !== filters.workMode) return false;
     if (filters.source && job.source !== filters.source) return false;
     if (q && !job.title.toLowerCase().includes(q) && !job.company.name.toLowerCase().includes(q)) {
       return false;

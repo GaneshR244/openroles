@@ -1,14 +1,12 @@
 // URL search params <-> JobFilters + display mode. Invalid values fall back to defaults.
-import type { Country, JobFilters, JobSource, View, WorkMode } from "./types";
+import type { Country, JobFilters, JobSource, View } from "./types";
 
 export type Mode = "jobs" | "companies";
-export type FilterableWorkMode = Exclude<WorkMode, "UNKNOWN">;
 export type RawSearchParams = Record<string, string | string[] | undefined>;
 
 export const VIEWS: readonly View[] = ["new", "week", "all"];
 export const MODES: readonly Mode[] = ["jobs", "companies"];
 export const COUNTRIES: readonly Country[] = ["IN", "AE", "US"];
-export const WORK_MODES: readonly FilterableWorkMode[] = ["ONSITE", "HYBRID", "REMOTE"];
 export const SOURCES: readonly JobSource[] = [
   "LINKEDIN",
   "GREENHOUSE",
@@ -34,7 +32,6 @@ export function parseSearchParams(raw: RawSearchParams): PageState {
     filters: {
       view: oneOf(first(raw.view), VIEWS) ?? DEFAULT_VIEW,
       country: oneOf(first(raw.country)?.toUpperCase(), COUNTRIES),
-      workMode: oneOf(first(raw.workMode)?.toUpperCase(), WORK_MODES),
       source: oneOf(first(raw.source)?.toUpperCase(), SOURCES),
       q: normalizeQuery(first(raw.q)),
       page: Math.min(positiveInt(first(raw.page)) ?? 1, MAX_PAGE),
@@ -48,7 +45,6 @@ export function toSearchParams(filters: JobFilters, mode: Mode = DEFAULT_MODE): 
   const params = new URLSearchParams();
   if (filters.view !== DEFAULT_VIEW) params.set("view", filters.view);
   if (filters.country) params.set("country", filters.country);
-  if (filters.workMode) params.set("workMode", filters.workMode);
   if (filters.source) params.set("source", filters.source);
   if (filters.q) params.set("q", filters.q);
   if (mode !== DEFAULT_MODE) params.set("mode", mode);
@@ -69,9 +65,9 @@ export function normalizeQuery(value: string | undefined): string | undefined {
   return trimmed && trimmed.length >= MIN_QUERY_LENGTH ? trimmed : undefined;
 }
 
-/** True when any narrowing filter (country, work mode, source, search) is set. */
+/** True when any narrowing filter (country, source, search) is set. */
 export function hasActiveFilters(filters: JobFilters): boolean {
-  return Boolean(filters.country || filters.workMode || filters.source || filters.q);
+  return Boolean(filters.country || filters.source || filters.q);
 }
 
 /** The same view and page size with every narrowing filter removed. */

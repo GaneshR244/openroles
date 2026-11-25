@@ -64,7 +64,6 @@ function filterQuery(filters: JobFilters): string {
     pageSize: String(filters.pageSize),
   });
   if (filters.country) params.set("country", filters.country);
-  if (filters.workMode) params.set("workMode", filters.workMode);
   if (filters.source) params.set("source", filters.source);
   if (filters.q) params.set("q", filters.q);
   return params.toString();

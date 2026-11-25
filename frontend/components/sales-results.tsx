@@ -47,7 +47,7 @@ function NoResults({ filters, mode, total }: PageState & { total: number }) {
     return (
       <EmptyState
         title="No roles match these filters"
-        description="Try another country, work mode or source, or a shorter search."
+        description="Try another country or source, or a shorter search."
         action={{ href: salesPageHref(clearFilters(filters), mode), label: "Reset filters" }}
       />
     );

@@ -16,7 +16,6 @@ export type RunStatus = "RUNNING" | "SUCCESS" | "PARTIAL" | "FAILED";
 export type JobFilters = {
   view: View;
   country?: Country;
-  workMode?: Exclude<WorkMode, "UNKNOWN">;
   source?: JobSource;
   /** At least 2 characters; matches job title or company name. */
   q?: string;

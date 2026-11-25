@@ -12,8 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFilterNavigation } from "@/components/filter-navigation";
-import { COUNTRIES, SOURCES, WORK_MODES, normalizeQuery } from "@/lib/filters";
-import { COUNTRY_LABELS, SOURCE_LABELS, WORK_MODE_LABELS } from "@/lib/labels";
+import { COUNTRIES, SOURCES, normalizeQuery } from "@/lib/filters";
+import { COUNTRY_LABELS, SOURCE_LABELS } from "@/lib/labels";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -28,13 +28,6 @@ export function Filters() {
         value={filters.country}
         options={COUNTRIES.map((value) => ({ value, label: COUNTRY_LABELS[value] }))}
         onChange={(country) => navigate({ country })}
-      />
-      <FilterSelect
-        label="Work mode"
-        allLabel="All work modes"
-        value={filters.workMode}
-        options={WORK_MODES.map((value) => ({ value, label: WORK_MODE_LABELS[value] }))}
-        onChange={(workMode) => navigate({ workMode })}
       />
       <FilterSelect
         label="Source"

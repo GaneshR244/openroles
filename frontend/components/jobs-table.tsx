@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/table";
 import { RelativeTime } from "@/components/relative-time";
 import { SourceBadge } from "@/components/source-badge";
-import { WorkModeBadge } from "@/components/work-mode-badge";
 import { COUNTRY_LABELS } from "@/lib/labels";
 import type { JobItem } from "@/lib/types";
 
@@ -32,7 +31,6 @@ export function JobsTable({ jobs, now, showCompany = true }: JobsTableProps) {
             {showCompany && <TableHead className="px-3">Company</TableHead>}
             <TableHead className="px-3">Role</TableHead>
             <TableHead className="px-3">Location</TableHead>
-            <TableHead className="px-3">Mode</TableHead>
             <TableHead className="px-3">Posted</TableHead>
             <TableHead className="px-3">Source</TableHead>
             <TableHead className="px-3">
@@ -53,9 +51,6 @@ export function JobsTable({ jobs, now, showCompany = true }: JobsTableProps) {
               <TableCell className="min-w-56 px-3 whitespace-normal">{job.title}</TableCell>
               <TableCell className="max-w-56 truncate px-3 text-muted-foreground">
                 {jobLocation(job)}
-              </TableCell>
-              <TableCell className="px-3">
-                <WorkModeBadge workMode={job.workMode} />
               </TableCell>
               <TableCell className="px-3 text-muted-foreground">
                 <RelativeTime iso={job.postedAt} now={now} />
