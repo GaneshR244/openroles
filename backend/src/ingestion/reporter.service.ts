@@ -32,7 +32,17 @@ export function summaryText(
     month: 'short',
   });
   const mins = Math.round(stats.durationMs / 60000);
-  const b = stats.boards;
+  // Both board passes together (the second pass reads boards found during this run).
+  const passes = [stats.boards, stats.boardsSecondPass].filter((p) => p !== null);
+  const sum = (key: 'due' | 'read' | 'unchanged' | 'failed' | 'closed') =>
+    passes.reduce((n, p) => n + p[key], 0);
+  const b = {
+    due: sum('due'),
+    read: sum('read'),
+    unchanged: sum('unchanged'),
+    failed: sum('failed'),
+    closed: sum('closed'),
+  };
   const lines = [
     `OpenRoles ${day} · ${status} in ${mins} min · ${fmt(stats.totals.newJobs)} new roles · ${fmt(stats.totals.newCompanies)} new companies`,
     `Boards: ${fmt(b.due)} due · ${fmt(b.read)} read · ${fmt(b.unchanged)} unchanged · ${fmt(b.failed)} failed · ${fmt(b.closed)} jobs closed`,

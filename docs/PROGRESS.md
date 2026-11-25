@@ -39,3 +39,67 @@ Branch: `build/v1` (local only, nothing pushed). One commit per phase.
   - `@nestjs/mau`: Nest's hosting platform.
   - The agent-skill folders the Nest CLI and `prisma init` added (`.agents`, `.claude`, `.windsurf`). We keep one set of project rules. Next.js's own `frontend/AGENTS.md` stays, because `next dev` re-creates it.
 - **npm:** npm 10.9 crashes resolving Vitest's peer dependencies ("Cannot read properties of null (reading 'edgesOut')"). Installs use npm 11 (`npx npm@11 install`). npm 11 blocks install scripts by default; only `@prisma/engines` is approved.
+
+---
+
+## Phases 2–9 and 11 (non-deploy): done, 25 Nov 2026
+
+Built in waves. Three agents worked in parallel on separate folders (pipeline helpers, HTTP client and readers, sales page) while the core logic was written in the main session. An independent reviewer agent then checked everything, and its findings were fixed.
+
+| Phase | Commit | What |
+|---|---|---|
+| 2 | `583fef1` | Pipeline helpers: normalize, fingerprint, country, work mode, filter, IST time (213 tests) |
+| 3 | `bfbdab8` | HTTP client (per-host limits, retry, breaker, host blocking) and 5 readers, tested on saved real responses |
+| 4 | `388c612` | Job store: batched dedupe, touch before filter, chunked inserts, set-difference close |
+| 5 | `ec8403a` | Board lane: adaptive polling 1→2→4→7 days, change hash, empty and truncated guards |
+| 6 | `4c902d3` | Board finder (verified slug probes) and YC import |
+| 7 | `41dfcf4` | Orchestrator: lease lock, heartbeat, deadline, retention, reporter, scripts |
+| 8 | `8dbd5a7` | Read API: jobs, companies, company page, latest run; API-key guard; zod validation |
+| 9 | `adc0571` | Sales page: views, filters in the URL, tables, company page, banner |
+| 11 | `793bc35` | Dockerfile, CI workflow, Prisma CLI as a runtime dependency (no deploy yet) |
+| review | `a10c790` | Fixes from the independent review and the first live runs (below) |
+
+**Checks**
+- backend: typecheck ✔ · lint ✔ · 310 unit tests ✔ · 35 integration and API tests on real PostgreSQL ✔
+- frontend: typecheck ✔ · lint ✔ · production build ✔
+
+**Live runs on this machine (real data)**
+- YC import: 6,408 companies, 1,458 hiring.
+- Board finder: 300 companies checked so far → 75 verified boards, mostly Ashby (YC startups).
+- Morning run 1: SUCCESS in 48 s, 137 new roles.
+  - Most dropped jobs were posted more than 30 days ago ("evergreen" posts); 39 were outside our markets.
+- **No duplicates (acceptance):** all 63 boards re-read the same day → all unchanged, 0 new, 0 closed, job count unchanged, every job's "last seen" refreshed, and intervals doubled to 2 days.
+- Run 3 (after the fixes): finder +14 boards, 24 new roles.
+- **Now:** 160 open roles at 37 companies, mostly US. India and UAE coverage stays thin until LinkedIn is switched on, as expected.
+- API (`/api/*`, needs the key) and the sales page both verified against real data. The API key appears in neither the page HTML nor the client JavaScript.
+
+**Fixes from the independent review and the live runs**
+- **Reposts:** a role reposted with a new ID (or one of two same-title openings closing) was wrongly closed. Rows are now relinked to the live posting, and a role whose fingerprint is still listed is never closed.
+- **Run robustness:**
+  - One failing item can't fail the run.
+  - Failed runs alert Slack.
+  - A reporting error can't flip a finished run to FAILED.
+- **Readers:** an empty page before the end of paging is reported as truncated, so nothing is closed.
+- **Board failures:**
+  - Timeouts, network errors and 5xx no longer count against a board; only 404s, changed formats and other 4xx do.
+  - A BROKEN board closes its jobs, is retried weekly, and reopens its jobs when it works again.
+- **API:**
+  - Board jobs not confirmed for 8 days are hidden.
+  - Health returns 503 when the database is down.
+  - Run status includes the second board pass.
+- **Same-name companies:** the board finder now keeps one board per company and rejects boards whose job links point to another company's website. Two wrong matches from the first run (Weave, Mosaic) were removed.
+- **Migrations:** Prisma tried to drop the trigram search indexes because they weren't declared in the schema. They are now declared, and a drift check comes back empty. The (status, postedAt) index was added.
+- **Database timezone:** set to UTC for the `openroles` role. The app was already timezone-safe; this protects manual SQL.
+
+**Notes for the next session**
+- **Workable is blocking this machine for about 24 hours** (HTTP 429, Retry-After 86081 s), triggered by the readers agent's testing. The client now stops calling a host that sends a long Retry-After, and the finder never probes Workable.
+- **Workable discovery is limited:** Workable boards are only read once added. The finder doesn't guess Workable slugs.
+
+## Not done yet
+- **Phase 10, LinkedIn:** waiting for the lead's OK. `LINKEDIN_ENABLED=false`.
+- **Deployment and the production cron:** waiting for a hosting decision. The cron line is in the README.
+- **Sales login:** waiting for a decision. Suggestion: Google sign-in limited to the company domain.
+
+## Running locally right now
+- **Sales page:** http://localhost:3000 · **API:** http://localhost:4000/api/health
+- **Another fetch:** `cd backend && npm run jobs:fetch` · **probe more companies:** `npm run seed:yc -- --find-boards=200`
