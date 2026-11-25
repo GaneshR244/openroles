@@ -1,4 +1,4 @@
-import type { INestApplication } from '@nestjs/common';
+import { StandardSchemaValidationPipe, type INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { type AppConfig, setting } from './config/app-config.js';
@@ -9,5 +9,6 @@ export function configureApp(app: INestApplication): void {
   app.use(helmet());
   app.enableCors({ origin: setting(config, 'FRONTEND_ORIGIN'), methods: ['GET'] });
   app.setGlobalPrefix('api');
+  app.useGlobalPipes(new StandardSchemaValidationPipe());
   app.enableShutdownHooks();
 }

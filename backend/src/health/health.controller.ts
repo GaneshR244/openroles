@@ -1,7 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { Public } from '../common/guards/api-key.guard.js';
 
 // GET /api/health: for uptime checks. Needs no API key (docs/ARCHITECTURE.md §3.13).
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
