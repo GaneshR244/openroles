@@ -1,0 +1,891 @@
+{
+  "offset": 0,
+  "limit": 100,
+  "totalFound": 15,
+  "content": [
+    {
+      "id": "744000163610179",
+      "name": "Senior Staff Product Manager",
+      "uuid": "63cb947f-a452-4ac5-8ed7-f699cf6ead24",
+      "jobAdId": "ba87ec73-78d0-46b6-8887-5ac5466dd398",
+      "defaultJobAd": true,
+      "refNumber": "P-1004307_1",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-25T05:38:36.601Z",
+      "location": {
+        "city": "Chennai",
+        "country": "in",
+        "remote": false,
+        "hybrid": true,
+        "fullLocation": "Chennai, , India"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "in",
+          "valueLabel": "India"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000163610179",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000163478790",
+      "name": "Sales Manager Southern Brazil (PR, SC & RS) (Senior Account Executive)",
+      "uuid": "1eec89fe-837e-4bd7-9c6c-d9a5b2d6f642",
+      "jobAdId": "ff58b38f-051f-4612-b1a8-cadcd8b2531b",
+      "defaultJobAd": true,
+      "refNumber": "P103313",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-24T14:58:36.113Z",
+      "location": {
+        "city": "Guarulhos",
+        "country": "br",
+        "remote": true,
+        "hybrid": false,
+        "fullLocation": "Guarulhos, , Brazil"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "contract",
+        "label": "Contract"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "br",
+          "valueLabel": "Brazil"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000163478790",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000163384959",
+      "name": "Senior Manager - Advisory Account Management",
+      "uuid": "394f9dc6-bae3-4672-982b-b77493210c42",
+      "jobAdId": "b4cba2b6-df62-4a8b-b014-66374fe54abd",
+      "defaultJobAd": true,
+      "refNumber": "P101837_1",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-24T05:39:55.574Z",
+      "location": {
+        "city": "Bengaluru",
+        "country": "in",
+        "remote": false,
+        "hybrid": false,
+        "fullLocation": "Bengaluru, , India"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "in",
+          "valueLabel": "India"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000163384959",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000163333090",
+      "name": "GTM AI Engineer",
+      "uuid": "6151a867-a2ff-4ce2-82ce-86bd8df25136",
+      "jobAdId": "3d83fc28-1bb1-47ac-81fe-6244d9e5c764",
+      "defaultJobAd": true,
+      "refNumber": "P102948",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-23T22:01:11.063Z",
+      "location": {
+        "city": "San Mateo",
+        "region": "CA",
+        "country": "us",
+        "remote": false,
+        "hybrid": true,
+        "hybridDescription": "3x/week oniste (Tues-Thurs)",
+        "latitude": "37.5629917",
+        "longitude": "-122.3255254",
+        "fullLocation": "San Mateo, CA, United States"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "us",
+          "valueLabel": "United States"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000163333090",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000163138631",
+      "name": "Account Executive (SG Territory)",
+      "uuid": "2eaa3933-cc99-4956-b096-c9a4e99415e8",
+      "jobAdId": "21356f71-d8b4-4e32-ae22-c572b5d007d3",
+      "defaultJobAd": true,
+      "refNumber": "REF8785Q",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-23T04:45:24.436Z",
+      "location": {
+        "city": "Singapore",
+        "country": "sg",
+        "remote": true,
+        "hybrid": false,
+        "latitude": "1.2811866",
+        "longitude": "103.8503404",
+        "fullLocation": "Singapore, , Singapore"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "sg",
+          "valueLabel": "Singapore"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000163138631",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000162802269",
+      "name": "Account Executive - Enterprise (SLED)",
+      "uuid": "edcdb7a4-fa7c-4a3c-a6e8-e725dbd9e752",
+      "jobAdId": "6011a8e0-90b1-47a4-894b-7e03da4088f3",
+      "defaultJobAd": false,
+      "refNumber": "P-1009415_2",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-20T18:48:39.171Z",
+      "location": {
+        "city": "Portland",
+        "region": "OR",
+        "country": "us",
+        "postalCode": "97201",
+        "remote": true,
+        "hybrid": false,
+        "fullLocation": "Portland, OR, United States"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "us",
+          "valueLabel": "United States"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000162802269",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000162802199",
+      "name": "Account Executive - Enterprise (SLED)",
+      "uuid": "c66a93a4-e96b-4536-98c2-962ee149c653",
+      "jobAdId": "5b413f83-9c5c-4665-894e-f6bcce732850",
+      "defaultJobAd": false,
+      "refNumber": "P-1009415_2",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-20T18:47:47.082Z",
+      "location": {
+        "city": "Seattle",
+        "region": "WA",
+        "country": "us",
+        "postalCode": "98101",
+        "remote": true,
+        "hybrid": false,
+        "fullLocation": "Seattle, WA, United States"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "us",
+          "valueLabel": "United States"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000162802199",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000162746649",
+      "name": "Lead - Account Manager",
+      "uuid": "60225db9-b752-4c8c-8fba-e5ad5b1e99e7",
+      "jobAdId": "84630e0d-f7b5-435c-af59-4ec69367218b",
+      "defaultJobAd": true,
+      "refNumber": "P103292",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-20T14:22:01.858Z",
+      "location": {
+        "city": "Paris",
+        "country": "fr",
+        "remote": false,
+        "hybrid": true,
+        "fullLocation": "Paris, , France"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "fr",
+          "valueLabel": "France"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000162746649",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000162469181",
+      "name": "Senior Business Development Manager",
+      "uuid": "9e46fb13-b38f-4c63-8ab6-7dab08bd7946",
+      "jobAdId": "f9e922a7-b8af-478b-b488-499d91d436a2",
+      "defaultJobAd": true,
+      "refNumber": "P101746_2",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-19T09:34:39.506Z",
+      "location": {
+        "city": "Bengaluru",
+        "country": "in",
+        "remote": false,
+        "hybrid": false,
+        "fullLocation": "Bengaluru, , India"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "associate",
+        "label": "Associate"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "in",
+          "valueLabel": "India"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000162469181",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000162466134",
+      "name": "Senior Account Executive - Inside Sales",
+      "uuid": "cbaf7a42-a2d9-4d33-8a51-0b6e0dd22c41",
+      "jobAdId": "435c2a76-dbe0-42df-adb8-43e0745ec505",
+      "defaultJobAd": true,
+      "refNumber": "P-1009839_2",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-19T09:13:14.376Z",
+      "location": {
+        "city": "Bengaluru",
+        "country": "in",
+        "remote": false,
+        "hybrid": false,
+        "fullLocation": "Bengaluru, , India"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "associate",
+        "label": "Associate"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "in",
+          "valueLabel": "India"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000162466134",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000162459509",
+      "name": "Sales Manager Enterprise (Field Sales) - MEA ",
+      "uuid": "8d32b988-28bb-4892-9719-34a400543bf8",
+      "jobAdId": "1bf292e1-f16c-4871-920f-125ba0649240",
+      "defaultJobAd": true,
+      "refNumber": "P101760_1",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-19T08:27:43.621Z",
+      "location": {
+        "city": "Bengaluru",
+        "country": "in",
+        "remote": false,
+        "hybrid": false,
+        "fullLocation": "Bengaluru, , India"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "in",
+          "valueLabel": "India"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000162459509",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000162442049",
+      "name": "Senior Director - Sales (SMB & Scaled) International",
+      "uuid": "ee0373d7-502c-4112-9f15-15e35a2b861e",
+      "jobAdId": "90a3de68-e16f-47b8-93c3-95bbc7c9f573",
+      "defaultJobAd": true,
+      "refNumber": "P103312",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-19T06:04:23.103Z",
+      "location": {
+        "city": "Bengaluru",
+        "country": "in",
+        "remote": false,
+        "hybrid": true,
+        "fullLocation": "Bengaluru, , India"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "director",
+        "label": "Director"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "in",
+          "valueLabel": "India"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000162442049",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000162433899",
+      "name": "Lead - Customer Success (Top Tier) MEA ",
+      "uuid": "090293df-2e3c-4406-86a3-4cb1a7f21f9e",
+      "jobAdId": "1ed9a29a-54fd-4faf-863f-fc964e3095de",
+      "defaultJobAd": true,
+      "refNumber": "P102965_1",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-19T04:51:05.897Z",
+      "location": {
+        "city": "Chennai",
+        "country": "in",
+        "remote": false,
+        "hybrid": false,
+        "fullLocation": "Chennai, , India"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "in",
+          "valueLabel": "India"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000162433899",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000162433129",
+      "name": "Account Executive (Japan Territory)",
+      "uuid": "f2c1f169-3230-482a-b30f-a26453b7348b",
+      "jobAdId": "caa30c82-c80c-4149-85fc-4c7ee5333088",
+      "defaultJobAd": true,
+      "refNumber": "P103297",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-19T04:35:50.361Z",
+      "location": {
+        "city": "Singapore",
+        "country": "sg",
+        "remote": true,
+        "hybrid": false,
+        "fullLocation": "Singapore, , Singapore"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "other",
+        "label": "Other"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "mid_senior_level",
+        "label": "Mid-Senior Level"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "sg",
+          "valueLabel": "Singapore"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000162433129",
+      "language": {
+        "code": "en",
+        "label": "English",
+        "labelNative": "English (US)"
+      }
+    },
+    {
+      "id": "744000162406599",
+      "name": "Director, Digital Experience",
+      "uuid": "1a8ab421-8b13-4349-8313-38befb338871",
+      "jobAdId": "954db76a-97a3-43ce-a6fc-8aff59ea530f",
+      "defaultJobAd": true,
+      "refNumber": "REF8774O",
+      "company": {
+        "identifier": "Freshworks",
+        "name": "Freshworks"
+      },
+      "releasedDate": "2026-11-18T23:26:30.275Z",
+      "location": {
+        "city": "San Mateo",
+        "region": "CA",
+        "country": "us",
+        "remote": false,
+        "hybrid": true,
+        "hybridDescription": "3 days a week onsite (Tuesday - Thursday)",
+        "latitude": "37.5629917",
+        "longitude": "-122.3255254",
+        "fullLocation": "San Mateo, CA, United States"
+      },
+      "industry": {
+        "id": "it_and_services",
+        "label": "Information Technology And Services"
+      },
+      "department": {},
+      "function": {
+        "id": "marketing",
+        "label": "Marketing"
+      },
+      "typeOfEmployment": {
+        "id": "permanent",
+        "label": "Full-time"
+      },
+      "experienceLevel": {
+        "id": "director",
+        "label": "Director"
+      },
+      "customField": [
+        {
+          "fieldId": "618bba30fa9dfa25d877c58b",
+          "fieldLabel": "Brands",
+          "valueId": "default",
+          "valueLabel": "Freshworks"
+        },
+        {
+          "fieldId": "COUNTRY",
+          "fieldLabel": "Country/Region",
+          "valueId": "us",
+          "valueLabel": "United States"
+        }
+      ],
+      "visibility": "PUBLIC",
+      "ref": "https://api.smartrecruiters.com/v1/companies/Freshworks/postings/744000162406599",
+      "language": {
+        "code": "en-GB",
+        "label": "English (UK)",
+        "labelNative": "English (UK)"
+      }
+    }
+  ]
+}

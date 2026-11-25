@@ -1,0 +1,410 @@
+{
+  "jobs": [
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8172510",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3537063,
+      "location": {
+        "name": "Seattle, San Francisco, New York City"
+      },
+      "metadata": null,
+      "id": 8172510,
+      "updated_at": "2026-11-19T12:12:24-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Abuse Investigator",
+      "company_name": "Stripe",
+      "first_published": "2026-09-09T10:50:29-04:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8138044",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3522152,
+      "location": {
+        "name": "San Francisco, CA"
+      },
+      "metadata": null,
+      "id": 8138044,
+      "updated_at": "2026-11-19T12:12:23-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, AI Sales",
+      "company_name": "Stripe",
+      "first_published": "2026-09-18T13:27:51-04:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8332467",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3601697,
+      "location": {
+        "name": "San Francisco, CA"
+      },
+      "metadata": null,
+      "id": 8332467,
+      "updated_at": "2026-11-19T12:12:30-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, AI Sales",
+      "company_name": "Stripe",
+      "first_published": "2026-11-06T10:32:55-05:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8238731",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3565010,
+      "location": {
+        "name": "San Francisco "
+      },
+      "metadata": null,
+      "id": 8238731,
+      "updated_at": "2026-11-19T12:12:28-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, AI Startups - Grower",
+      "company_name": "Stripe",
+      "first_published": "2026-10-02T12:55:48-04:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8274927",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3580185,
+      "location": {
+        "name": "Chicago, San Francisco, New York "
+      },
+      "metadata": null,
+      "id": 8274927,
+      "updated_at": "2026-11-19T13:15:43-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, Amer Platform (Growth Velocity)",
+      "company_name": "Stripe",
+      "first_published": "2026-11-19T13:15:43-05:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8215824",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3555560,
+      "location": {
+        "name": "SF, NYC, CHI, ATL, SEA"
+      },
+      "metadata": null,
+      "id": 8215824,
+      "updated_at": "2026-11-19T12:12:27-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive - Bridge",
+      "company_name": "Stripe",
+      "first_published": "2026-10-15T11:50:50-04:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8077887",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3499744,
+      "location": {
+        "name": "SF, NYC, SEA, CHI"
+      },
+      "metadata": null,
+      "id": 8077887,
+      "updated_at": "2026-11-19T12:12:22-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, Bridge ",
+      "company_name": "Stripe",
+      "first_published": "2026-07-22T13:15:53-04:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8123027",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3518194,
+      "location": {
+        "name": "Chicago"
+      },
+      "metadata": null,
+      "id": 8123027,
+      "updated_at": "2026-11-23T12:17:03-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, Commercial (Grower)",
+      "company_name": "Stripe",
+      "first_published": "2026-08-11T19:45:35-04:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8345653",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3607312,
+      "location": {
+        "name": "Tokyo"
+      },
+      "metadata": null,
+      "id": 8345653,
+      "updated_at": "2026-11-19T12:10:21-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive (Commercial Grower, Japan)",
+      "company_name": "Stripe",
+      "first_published": "2026-11-16T20:52:35-05:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8379538",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 3257131,
+      "location": {
+        "name": "Chicago"
+      },
+      "metadata": null,
+      "id": 8379538,
+      "updated_at": "2026-11-23T12:04:03-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, Commercial Hunter",
+      "company_name": "Stripe",
+      "first_published": "2026-11-11T12:03:29-05:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=7277406",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3257131,
+      "location": {
+        "name": "Chicago "
+      },
+      "metadata": null,
+      "id": 7277406,
+      "updated_at": "2026-11-23T15:17:33-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, Commercial (Hunter)",
+      "company_name": "Stripe",
+      "first_published": "2025-12-03T11:34:54-05:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8258078",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3573309,
+      "location": {
+        "name": "Sydney"
+      },
+      "metadata": null,
+      "id": 8258078,
+      "updated_at": "2026-11-19T12:10:12-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, Commercial Hunter, AUNZ",
+      "company_name": "Stripe",
+      "first_published": "2026-10-06T01:36:09-04:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=7789539",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3407094,
+      "location": {
+        "name": "Japan"
+      },
+      "metadata": null,
+      "id": 7789539,
+      "updated_at": "2026-11-19T12:09:52-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, Commercial Hunter Japan",
+      "company_name": "Stripe",
+      "first_published": "2026-04-17T00:47:42-04:00",
+      "language": "ja",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8411021",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 3546875,
+      "location": {
+        "name": "Dublin"
+      },
+      "metadata": null,
+      "id": 8411021,
+      "updated_at": "2026-11-23T09:37:30-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, Commercial Scaled Grower",
+      "company_name": "Stripe",
+      "first_published": "2026-11-23T05:29:30-05:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://stripe.com/jobs/search?gh_jid=8352489",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3610144,
+      "location": {
+        "name": "Bangalore"
+      },
+      "metadata": null,
+      "id": 8352489,
+      "updated_at": "2026-11-19T12:10:22-05:00",
+      "requisition_id": "See Opening ID",
+      "title": "Account Executive, Commercial & SMB (India)",
+      "company_name": "Stripe",
+      "first_published": "2026-11-10T22:43:54-05:00",
+      "language": "en",
+      "application_deadline": null
+    }
+  ],
+  "meta": {
+    "total": 15
+  }
+}
