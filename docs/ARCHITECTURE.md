@@ -22,6 +22,29 @@ These override older wording below where they differ.
   - Integration and e2e: `test/**/*.int-spec.ts` and `test/**/*.e2e-spec.ts` against `openroles_test`. The global setup runs `prisma migrate deploy`.
 - **npm ≥ 11 is required** (npm 10.9 crashes resolving Vitest peers).
 
+## As built: behaviour decisions (phases 2–9, 25 Nov 2026)
+- **Country (§3.6).**
+  - Structured codes win when they contain a target. Otherwise the location text is checked; OUT only if both fail.
+  - The "City, ST" rule only accepts US state codes that are not also ISO country codes (TX, NY, WA, …). Ambiguous codes (CA, IL, DE, IN, …) need a known US city, so "Berlin, DE" and "Tel Aviv, IL" are OUT.
+  - Pakistan indicators (pakistan, sindh, karachi, lahore, islamabad, rawalpindi, code PK) turn off the Hyderabad/Punjab → India match.
+  - Dotted initials are joined before suffix stripping ("L.L.C." → "llc").
+  - In text, hybrid beats remote.
+- **Readers** return `{ jobs, truncated }`.
+  - `truncated` is true only when paging stopped at the cap with more left (SmartRecruiters 20 pages, Workable 50).
+  - A truncated read saves new jobs but never closes any, and never sets the change-detection hash.
+- **Host blocking.**
+  - A 429 with a Retry-After longer than the host's retry cap blocks that host for the rest of the run (BlockedError, no request). Three consecutive 429s do the same on every ATS host.
+  - These host-level errors don't count as board failures: the board is retried tomorrow and never marked BROKEN because of them.
+- **Workable:**
+  - Polite policy: 1 request at a time, 1.5–2.5 s apart.
+  - The board finder does **not** probe Workable slugs, because Workable rate-limits bursts for about 24 h. Workable boards can be added by hand or found from links later.
+- **Run status:** PARTIAL means the deadline was hit, LinkedIn was blocked, or more than 10% of due boards failed. A few failing boards is normal noise and stays SUCCESS, with the details in `stats.boards.errors`.
+- **API:** `GET /api/runs/latest` also returns `today: { newJobs, companies }`, live counts for the banner.
+- **Frontend:**
+  - Next 16 `cacheComponents` and partial prerendering.
+  - `lib/api.ts` is `server-only`.
+  - `OPENROLES_SAMPLE_DATA=1` shows made-up data in dev only; production builds ignore it.
+
 ## 0. Scope
 
 **In scope (v1)**

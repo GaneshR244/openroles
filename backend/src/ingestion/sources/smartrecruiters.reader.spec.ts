@@ -103,13 +103,13 @@ describe('SmartRecruitersReader', () => {
     expect(read.truncated).toBe(false);
   });
 
-  it('stops on an empty page even if totalFound says more', async () => {
+  it('stops on an empty page before totalFound and reports the list as truncated', async () => {
     const { http, reader } = setup();
     http.getJson.mockResolvedValueOnce(page(0, 100, 500)).mockResolvedValueOnce(page(100, 0, 500));
 
     const { jobs, truncated } = await reader.read('Freshworks');
     expect(jobs).toHaveLength(100);
-    expect(truncated).toBe(false);
+    expect(truncated).toBe(true);
     expect(http.getJson).toHaveBeenCalledTimes(2);
   });
 

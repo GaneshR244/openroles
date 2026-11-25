@@ -31,13 +31,17 @@ export function decideStatus(stats: Omit<RunStats, 'durationMs' | 'partialReason
   reasons: string[];
 } {
   const reasons: string[] = [];
-  const b = stats.boards;
-  if (b.stoppedByDeadline || stats.finder?.stoppedByDeadline) reasons.push('deadline');
+  const passes = [stats.boards, stats.boardsSecondPass].filter((p): p is BoardLaneStats => !!p);
+  const due = passes.reduce((n, p) => n + p.due, 0);
+  const failed = passes.reduce((n, p) => n + p.failed, 0);
+  const read = passes.reduce((n, p) => n + p.read, 0);
+  if (passes.some((p) => p.stoppedByDeadline) || stats.finder?.stoppedByDeadline) {
+    reasons.push('deadline');
+  }
   if (stats.linkedin.blocked) reasons.push('linkedin_blocked');
-  if (b.due > 0 && b.failed / b.due > BOARD_FAILURE_PARTIAL_SHARE)
-    reasons.push('many_board_failures');
+  if (due > 0 && failed / due > BOARD_FAILURE_PARTIAL_SHARE) reasons.push('many_board_failures');
   const nothingWorked =
-    b.due > 0 && b.read === 0 && (!stats.linkedin.enabled || stats.linkedin.cards === 0);
+    due > 0 && read === 0 && (!stats.linkedin.enabled || stats.linkedin.cards === 0);
   if (nothingWorked) return { status: 'FAILED', reasons: ['no_source_read', ...reasons] };
   return { status: reasons.length ? 'PARTIAL' : 'SUCCESS', reasons };
 }

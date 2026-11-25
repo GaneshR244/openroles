@@ -5,7 +5,13 @@ import { BoardStatus } from '../generated/prisma/enums.js';
 import type { Ats, JobSource } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { type AppConfig, setting } from '../config/app-config.js';
-import { HttpError, isHostBlockedError } from '../common/http/errors.js';
+import {
+  HttpError,
+  NetworkError,
+  ServerError,
+  TimeoutError,
+  isHostBlockedError,
+} from '../common/http/errors.js';
 import { runPool } from '../common/pool.js';
 import { addDays, startOfIstDay } from '../common/time.js';
 import { BoardReaders } from './sources/board-readers.js';
@@ -20,6 +26,7 @@ import type { DropReason } from './pipeline/pipeline.types.js';
 const WORKERS = 5;
 const MAX_INTERVAL_DAYS = 7;
 const FAILS_BEFORE_BROKEN = 3;
+const BROKEN_RETRY_DAYS = 7; // broken boards are retried weekly, so an outage heals itself
 const EMPTY_READS_BEFORE_CLOSE_ALL = 2;
 const MAX_ERRORS_KEPT = 50;
 
@@ -37,8 +44,8 @@ export type BoardLaneStats = {
   read: number;
   unchanged: number;
   failed: number;
-  /** Host refused us (rate limit / blocked): retried tomorrow, not counted against the board. */
-  hostBlocked: number;
+  /** Host-level problem (rate limit, block, timeout, network, 5xx): retried tomorrow, not counted against the board. */
+  transient: number;
   broken: number;
   /** Read stopped at the page cap: jobs saved, but nothing closed. */
   truncated: number;
@@ -55,6 +62,7 @@ type DueBoard = {
   ats: Ats;
   slug: string;
   companyId: string;
+  status: BoardStatus;
   failCount: number;
   emptyCount: number;
   fetchIntervalDays: number;
@@ -62,6 +70,16 @@ type DueBoard = {
   openJobs: number;
   company: { name: string };
 };
+
+/** Host-level problems that say nothing about the board itself. */
+export function isTransient(err: unknown): boolean {
+  return (
+    isHostBlockedError(err) ||
+    err instanceof TimeoutError ||
+    err instanceof NetworkError ||
+    err instanceof ServerError
+  );
+}
 
 /** sha1 of the sorted external IDs: equal hashes mean the board's job list didn't change. */
 export function jobsHash(externalIds: readonly string[]): string {
@@ -86,7 +104,7 @@ function emptyStats(): BoardLaneStats {
     read: 0,
     unchanged: 0,
     failed: 0,
-    hostBlocked: 0,
+    transient: 0,
     broken: 0,
     truncated: 0,
     suspiciousEmpty: 0,
@@ -123,7 +141,7 @@ export class BoardLaneService {
     const stats = emptyStats();
     const boards: DueBoard[] = await this.prisma.board.findMany({
       where: {
-        status: BoardStatus.ACTIVE,
+        status: { in: [BoardStatus.ACTIVE, BoardStatus.BROKEN] },
         nextFetchAt: { lte: opts.now },
         ...(opts.createdSince ? { createdAt: { gte: opts.createdSince } } : {}),
         ...(opts.only ? { ats: opts.only } : {}),
@@ -135,6 +153,7 @@ export class BoardLaneService {
         ats: true,
         slug: true,
         companyId: true,
+        status: true,
         failCount: true,
         emptyCount: true,
         fetchIntervalDays: true,
@@ -155,6 +174,10 @@ export class BoardLaneService {
       WORKERS,
       (board) => this.processBoard(board, opts.now, stats),
       pastDeadline,
+      (board, err) => {
+        stats.failed++;
+        this.logger.error(`board ${board.ats}/${board.slug}: ${(err as Error)?.message ?? err}`);
+      },
     );
 
     this.logger.log(
@@ -187,6 +210,7 @@ export class BoardLaneService {
         await this.prisma.board.update({
           where: { id: board.id },
           data: {
+            status: BoardStatus.ACTIVE,
             emptyCount: { increment: 1 },
             lastFetchedAt: now,
             nextFetchAt: nextFetchAt(now, 1),
@@ -205,6 +229,7 @@ export class BoardLaneService {
         await this.prisma.board.update({
           where: { id: board.id },
           data: {
+            status: BoardStatus.ACTIVE,
             failCount: 0,
             emptyCount: 0,
             lastFetchedAt: now,
@@ -233,7 +258,16 @@ export class BoardLaneService {
         discoveredVia: 'board',
         now,
       });
-      const closed = read.truncated ? 0 : await this.store.closeMissing(board.id, ids, now);
+      // Reposts and duplicate openings keep their role open under the live posting's ID.
+      await this.store.relinkReposts(board.id, batch.kept, ids, now);
+      const closed = read.truncated
+        ? 0
+        : await this.store.closeMissing(
+            board.id,
+            ids,
+            now,
+            batch.seen.map((j) => j.fingerprint),
+          );
       if (read.truncated) stats.truncated++;
       const openJobs = await this.store.countOpen(board.id);
 
@@ -243,6 +277,7 @@ export class BoardLaneService {
       await this.prisma.board.update({
         where: { id: board.id },
         data: {
+          status: BoardStatus.ACTIVE,
           failCount: 0,
           emptyCount: 0,
           lastJobsHash: hash,
@@ -257,7 +292,11 @@ export class BoardLaneService {
     }
   }
 
-  /** A failed read never closes jobs. Three real failures in a row mark the board BROKEN. */
+  /**
+   * A failed read never closes jobs. Host-level problems are retried tomorrow without counting.
+   * Three board-level failures in a row (404, changed format, other 4xx) mark the board BROKEN:
+   * its jobs are closed (their links are likely dead) and it is retried weekly.
+   */
   private async recordFailure(
     board: DueBoard,
     now: Date,
@@ -268,10 +307,10 @@ export class BoardLaneService {
     if (stats.errors.length < MAX_ERRORS_KEPT)
       stats.errors.push({ ats: board.ats, slug: board.slug, code });
 
-    // The whole host refused us (rate limit): not this board's fault, so retry tomorrow
+    // Not this board's fault (rate limit, block, timeout, network, 5xx): retry tomorrow
     // without counting a failure.
-    if (isHostBlockedError(err)) {
-      stats.hostBlocked++;
+    if (isTransient(err)) {
+      stats.transient++;
       await this.prisma.board.update({
         where: { id: board.id },
         data: { nextFetchAt: nextFetchAt(now, 1) },
@@ -287,14 +326,20 @@ export class BoardLaneService {
     }
     const failCount = board.failCount + 1;
     const broken = failCount >= FAILS_BEFORE_BROKEN;
-    if (broken) stats.broken++;
+    if (broken && board.status !== BoardStatus.BROKEN) {
+      stats.broken++;
+      stats.closed += await this.store.closeAll(board.id, now);
+    }
     await this.prisma.board.update({
       where: { id: board.id },
       data: {
         failCount,
         status: broken ? BoardStatus.BROKEN : BoardStatus.ACTIVE,
+        openJobs: broken ? 0 : undefined,
+        // Forget the job list so the first good read after a break reopens jobs (full path).
+        lastJobsHash: broken ? null : undefined,
         lastFetchedAt: now,
-        nextFetchAt: nextFetchAt(now, 1),
+        nextFetchAt: nextFetchAt(now, broken ? BROKEN_RETRY_DAYS : 1),
       },
     });
   }

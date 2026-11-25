@@ -33,9 +33,9 @@ export class SmartRecruitersReader implements BoardReader {
       const data = parseResponse(smartRecruitersPageSchema, body, url);
       jobs.push(...data.content.map((posting) => toRawJob(slug, posting)));
       offset += data.content.length;
-      if (data.content.length === 0 || offset >= data.totalFound) {
-        return { jobs, truncated: false };
-      }
+      if (offset >= data.totalFound) return { jobs, truncated: false };
+      // An empty page before totalFound means the list was cut short: never treat it as complete.
+      if (data.content.length === 0) return { jobs, truncated: true };
     }
     // Stopped at maxPages with postings still left.
     return { jobs, truncated: true };

@@ -2,7 +2,13 @@ import { decideStatus } from './run-stats.js';
 import { windowSeconds } from './run-orchestrator.service.js';
 import { isAnomaly } from './reporter.service.js';
 import { jobsHash, nextFetchAt, nextInterval } from './board-lane.service.js';
-import { slugCandidates, verifyHit } from './board-finder.service.js';
+import {
+  domainConflicts,
+  domainLabel,
+  pickBoard,
+  slugCandidates,
+  verifyHit,
+} from './board-finder.service.js';
 import type { RawJob } from './sources/source.types.js';
 import type { BoardLaneStats } from './board-lane.service.js';
 
@@ -11,7 +17,7 @@ const boards = (over: Partial<BoardLaneStats> = {}): BoardLaneStats => ({
   read: 100,
   unchanged: 50,
   failed: 0,
-  hostBlocked: 0,
+  transient: 0,
   broken: 0,
   truncated: 0,
   suspiciousEmpty: 0,
@@ -147,5 +153,47 @@ describe('board finder helpers', () => {
         'IN',
       ]),
     ).toBe(false);
+  });
+
+  it('rejects a board whose jobs link to a different company website', () => {
+    const job = rawJob({ url: 'https://www.getweave.com/careers/123' });
+    expect(domainConflicts([job], 'https://weaveos.com')).toBe(true);
+    expect(
+      verifyHit([job], { normalizedName: 'weave', website: 'https://weaveos.com' }, 'weave', [
+        'IN',
+      ]),
+    ).toBe(false);
+    const own = rawJob({ url: 'https://careers.weaveos.com/jobs/1' });
+    expect(domainConflicts([own], 'weaveos.com')).toBe(false);
+    const ats = rawJob({ url: 'https://job-boards.greenhouse.io/weave/jobs/1' });
+    expect(domainConflicts([ats], 'https://weaveos.com')).toBe(false);
+  });
+
+  it('reads the company part of a domain', () => {
+    expect(domainLabel('https://careers.getweave.com/x')).toBe('getweave');
+    expect(domainLabel('acme.co.in')).toBe('acme');
+    expect(domainLabel('https://www.stripe.com')).toBe('stripe');
+    expect(domainLabel(null)).toBeNull();
+  });
+
+  it('keeps one board per company: website match first, then the more common system', () => {
+    const hits = [
+      { ats: 'GREENHOUSE' as const, slug: 'weave' },
+      { ats: 'ASHBY' as const, slug: 'weave' },
+    ];
+    expect(pickBoard(hits, 'https://weaveos.com')).toEqual({ ats: 'ASHBY', slug: 'weave' });
+    expect(
+      pickBoard(
+        [
+          { ats: 'ASHBY', slug: 'acme' },
+          { ats: 'LEVER', slug: 'acmehq' },
+        ],
+        'https://acmehq.com',
+      ),
+    ).toEqual({
+      ats: 'LEVER',
+      slug: 'acmehq',
+    });
+    expect(pickBoard([], null)).toBeNull();
   });
 });

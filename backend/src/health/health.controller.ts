@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { Public } from '../common/guards/api-key.guard.js';
 
@@ -11,6 +11,8 @@ export class HealthController {
   @Get()
   async check(): Promise<{ ok: boolean; db: boolean }> {
     const db = await this.prisma.isHealthy();
-    return { ok: db, db };
+    // 503 so uptime checks that only look at the status code notice an outage.
+    if (!db) throw new ServiceUnavailableException({ ok: false, db: false });
+    return { ok: true, db };
   }
 }

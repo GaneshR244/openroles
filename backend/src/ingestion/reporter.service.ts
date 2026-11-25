@@ -77,6 +77,12 @@ export class ReporterService {
     return text;
   }
 
+  /** Short Slack alert for a run that failed outright (no summary to send). */
+  async alertFailure(message: string): Promise<void> {
+    const hook = setting(this.config, 'SLACK_WEBHOOK_URL');
+    if (hook) await this.postToSlack(hook, `OpenRoles run FAILED: ${message.slice(0, 500)}`);
+  }
+
   private async previousNewJobs(runId: string): Promise<number[]> {
     const runs = await this.prisma.fetchRun.findMany({
       where: { id: { not: runId }, status: { in: ['SUCCESS', 'PARTIAL'] } },

@@ -3,7 +3,13 @@ import { BoardLaneService, nextFetchAt } from '../src/ingestion/board-lane.servi
 import { JobStoreService } from '../src/ingestion/job-store.service.js';
 import { BoardReaders } from '../src/ingestion/sources/board-readers.js';
 import type { RawJob } from '../src/ingestion/sources/source.types.js';
-import { RateLimitedError } from '../src/common/http/errors.js';
+import {
+  NetworkError,
+  NotFoundError,
+  RateLimitedError,
+  ServerError,
+  TimeoutError,
+} from '../src/common/http/errors.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { createTestingApp, resetDb } from './helpers/db.js';
 
@@ -121,23 +127,78 @@ describe('BoardLaneService (integration, real PostgreSQL)', () => {
     expect((await board(b.id)).openJobs).toBe(5);
   });
 
-  it('failures never close jobs; three in a row mark the board BROKEN', async () => {
+  it('failures keep jobs open; the third marks the board BROKEN, closes its jobs and retries weekly', async () => {
     const b = await makeBoard();
     readers.response = [raw('1')];
     await runAt(day1);
-    readers.response = new Error('boom');
+    readers.response = new NotFoundError('https://boards-api.greenhouse.io/v1/boards/acme/jobs');
     let now = day1;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       now = new Date((await board(b.id)).nextFetchAt.getTime() + 60_000);
       await runAt(now);
     }
+    expect(await prisma.job.count({ where: { status: 'ACTIVE' } })).toBe(1); // 2 failures: still open
+
+    now = new Date((await board(b.id)).nextFetchAt.getTime() + 60_000);
+    const third = await runAt(now);
+    expect(third).toMatchObject({ broken: 1, closed: 1 });
     const after = await board(b.id);
     expect(after.failCount).toBe(3);
     expect(after.status).toBe('BROKEN');
-    expect(await prisma.job.count({ where: { status: 'ACTIVE' } })).toBe(1);
+    expect(after.nextFetchAt).toEqual(nextFetchAt(now, 7));
+    expect(await prisma.job.count({ where: { status: 'ACTIVE' } })).toBe(0);
+
     readers.calls = 0;
+    await runAt(new Date(now.getTime() + 86_400_000)); // next day: skipped
+    expect(readers.calls).toBe(0);
+
+    readers.response = [raw('1')]; // a week later the board works again
     await runAt(new Date(after.nextFetchAt.getTime() + 60_000));
-    expect(readers.calls).toBe(0); // broken boards are skipped
+    expect(readers.calls).toBe(1);
+    const healed = await board(b.id);
+    expect(healed.status).toBe('ACTIVE');
+    expect(healed.failCount).toBe(0);
+    expect(await prisma.job.count({ where: { status: 'ACTIVE' } })).toBe(1); // reopened
+  });
+
+  it('timeouts, network errors and 5xx are not counted against the board', async () => {
+    const b = await makeBoard();
+    for (const err of [
+      new TimeoutError('https://x', 10_000),
+      new NetworkError('https://x'),
+      new ServerError('https://x', 503),
+    ]) {
+      readers.response = err;
+      const now = new Date((await board(b.id)).nextFetchAt.getTime() + 60_000);
+      const stats = await runAt(now);
+      expect(stats).toMatchObject({ transient: 1, failed: 0 });
+    }
+    expect((await board(b.id)).failCount).toBe(0);
+  });
+
+  it('a repost with a new ID keeps the role open and points it at the live posting', async () => {
+    const b = await makeBoard();
+    readers.response = [raw('111', { title: 'Account Executive', locations: ['Mumbai, India'] })];
+    await runAt(day1);
+    readers.response = [raw('222', { title: 'Account Executive', locations: ['Mumbai, India'] })];
+    const stats = await runAt(new Date('2026-11-26T00:40:00Z'));
+    expect(stats).toMatchObject({ new: 0, closed: 0 });
+    const rows = await prisma.job.findMany();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ externalId: '222', status: 'ACTIVE' });
+    expect(rows[0]!.url).toContain('/222');
+    expect((await board(b.id)).openJobs).toBe(1);
+  });
+
+  it('two openings with the same title: when one closes, the role stays open', async () => {
+    await makeBoard();
+    const same = { title: 'Sales Executive', locations: ['Chennai, India'] };
+    readers.response = [raw('a1', same), raw('a2', same), raw('b1')];
+    await runAt(day1);
+    readers.response = [raw('a2', same), raw('b1')];
+    const stats = await runAt(new Date('2026-11-26T00:40:00Z'));
+    expect(stats.closed).toBe(0);
+    expect(await prisma.job.count({ where: { status: 'ACTIVE' } })).toBe(2);
   });
 
   it('empty-response guard: one empty read closes nothing, a second closes everything', async () => {
@@ -186,7 +247,7 @@ describe('BoardLaneService (integration, real PostgreSQL)', () => {
     const b = await makeBoard();
     readers.response = new RateLimitedError('https://apply.workable.com/x', 86_000_000);
     const stats = await runAt(day1);
-    expect(stats).toMatchObject({ hostBlocked: 1, failed: 0 });
+    expect(stats).toMatchObject({ transient: 1, failed: 0 });
     const after = await board(b.id);
     expect(after.failCount).toBe(0);
     expect(after.status).toBe('ACTIVE');

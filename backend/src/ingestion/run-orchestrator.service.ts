@@ -133,7 +133,13 @@ export class RunOrchestratorService {
       };
       // Keep the stats JSON-safe for the database.
       await this.finish(run.id, status, stats);
-      const summary = await this.reporter.report(run.id, status, stats, startedAt);
+      // The run is already saved; a reporting problem must not turn it into FAILED.
+      const summary = await this.reporter
+        .report(run.id, status, stats, startedAt)
+        .catch((err: Error) => {
+          this.logger.warn(`report failed: ${err.message}`);
+          return `OpenRoles run ${status}`;
+        });
       return { status, runId: run.id, stats, summary };
     } catch (err) {
       const message = (err as Error)?.message ?? String(err);
@@ -142,6 +148,7 @@ export class RunOrchestratorService {
         where: { id: run.id },
         data: { status: 'FAILED', finishedAt: new Date(), error: message.slice(0, 2000) },
       });
+      await this.reporter.alertFailure(message).catch(() => undefined);
       throw err;
     } finally {
       clearInterval(heartbeat);

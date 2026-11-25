@@ -38,15 +38,75 @@ function titleCaseJoined(normalized: string): string {
     .join('');
 }
 
-function websiteLabel(website: string | null): string | null {
-  if (!website) return null;
+/** Hosts that belong to the job-board systems themselves, not to the hiring company. */
+const ATS_HOSTS = [
+  'greenhouse.io',
+  'lever.co',
+  'ashbyhq.com',
+  'smartrecruiters.com',
+  'workable.com',
+];
+/** Two-part public suffixes we see in practice ("acme.co.in" → "acme"). */
+const SECOND_LEVEL = new Set(['co', 'com', 'net', 'org', 'ac', 'gov']);
+
+/** The company's own name in a host: "careers.getweave.com" → "getweave", "acme.co.in" → "acme". */
+export function domainLabel(hostOrUrl: string | null | undefined): string | null {
+  if (!hostOrUrl) return null;
   try {
-    const host = new URL(website.includes('://') ? website : `https://${website}`).hostname;
-    const label = host.replace(/^www\./, '').split('.')[0];
-    return label && /^[a-z0-9-]+$/i.test(label) ? label.toLowerCase() : null;
+    const host = new URL(hostOrUrl.includes('://') ? hostOrUrl : `https://${hostOrUrl}`).hostname
+      .toLowerCase()
+      .replace(/^www\./, '');
+    const parts = host.split('.').filter(Boolean);
+    if (parts.length < 2) return null;
+    const twoPartSuffix = parts.length >= 3 && SECOND_LEVEL.has(parts[parts.length - 2]!);
+    const label = parts[parts.length - (twoPartSuffix ? 3 : 2)];
+    return label && /^[a-z0-9-]+$/.test(label) ? label : null;
   } catch {
     return null;
   }
+}
+
+function websiteLabel(website: string | null): string | null {
+  return domainLabel(website);
+}
+
+function isAtsHost(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return ATS_HOSTS.some((h) => host === h || host.endsWith(`.${h}`));
+  } catch {
+    return true; // unparseable: no evidence either way
+  }
+}
+
+/**
+ * Same-name companies are the main risk of slug guessing. When a board's jobs link to the
+ * company's own careers site, that domain must match the website we know.
+ */
+export function domainConflicts(jobs: readonly RawJob[], website: string | null): boolean {
+  const ours = websiteLabel(website);
+  if (!ours) return false;
+  return jobs.some((j) => !isAtsHost(j.url) && domainLabel(j.url) !== ours);
+}
+
+const ATS_PREFERENCE: readonly Ats[] = [Ats.ASHBY, Ats.GREENHOUSE, Ats.LEVER, Ats.SMARTRECRUITERS];
+
+/**
+ * A company almost never uses two job-board systems at once, so several verified hits usually
+ * mean a same-name company. Keep one: the board named like the company's website first, then
+ * the more common system.
+ */
+export function pickBoard(
+  hits: readonly { ats: Ats; slug: string }[],
+  website: string | null,
+): { ats: Ats; slug: string } | null {
+  if (hits.length === 0) return null;
+  const label = websiteLabel(website);
+  const byWebsite = label ? hits.find((h) => h.slug.toLowerCase() === label) : undefined;
+  if (byWebsite) return byWebsite;
+  return [...hits].sort(
+    (a, b) => ATS_PREFERENCE.indexOf(a.ats) - ATS_PREFERENCE.indexOf(b.ats),
+  )[0]!;
 }
 
 /**
@@ -66,15 +126,17 @@ export function slugCandidates(
 
 /**
  * A probe hit counts only if the board has jobs, the name matches (the API's company name,
- * or the slug equals our cleaned name exactly), and at least one job is in our markets.
+ * or the slug equals our cleaned name exactly), its job links don't point to another
+ * company's website, and at least one job is in our markets.
  */
 export function verifyHit(
   jobs: readonly RawJob[],
-  company: Pick<Candidate, 'normalizedName'>,
+  company: Pick<Candidate, 'normalizedName'> & { website?: string | null },
   slug: string,
   targetCountries: readonly Country[],
 ): boolean {
   if (jobs.length === 0) return false;
+  if (domainConflicts(jobs, company.website ?? null)) return false;
   const apiName = jobs.find((j) => j.companyName)?.companyName;
   const nameMatches = apiName ? normalizeCompany(apiName) === company.normalizedName : false;
   const slugMatches =
@@ -125,14 +187,12 @@ export class BoardFinderService {
       COMPANY_WORKERS,
       async (company) => {
         const found = await this.probeCompany(company, targetCountries, stats);
-        if (found.length > 0) {
+        const board = pickBoard(found, company.website);
+        if (board) {
           const created = await this.prisma.board.createMany({
-            data: found.map((f) => ({
-              ats: f.ats,
-              slug: f.slug,
-              companyId: company.id,
-              nextFetchAt: opts.now,
-            })),
+            data: [
+              { ats: board.ats, slug: board.slug, companyId: company.id, nextFetchAt: opts.now },
+            ],
             skipDuplicates: true,
           });
           stats.boardsFound += created.count;
@@ -144,6 +204,10 @@ export class BoardFinderService {
         stats.probedCompanies++;
       },
       pastDeadline,
+      (company, err) => {
+        stats.probeErrors++;
+        this.logger.error(`board finder ${company.name}: ${(err as Error)?.message ?? err}`);
+      },
     );
 
     this.logger.log(

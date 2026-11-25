@@ -130,6 +130,26 @@ describe('Read API (e2e)', () => {
         },
       ],
     });
+    // A board job whose board hasn't confirmed it for 10 days (e.g. a failing board) is hidden.
+    const board = await prisma.board.create({
+      data: { ats: 'GREENHOUSE', slug: 'acme', companyId: acme.id },
+    });
+    await prisma.job.create({
+      data: {
+        ...base,
+        source: 'GREENHOUSE',
+        externalId: 'g9',
+        fingerprint: 'f9',
+        title: 'Stale Board Role',
+        location: 'Pune',
+        country: 'IN',
+        postedAt: daysAgo(12),
+        firstSeenAt: daysAgo(12),
+        lastSeenAt: daysAgo(10),
+        companyId: acme.id,
+        boardId: board.id,
+      },
+    });
     await prisma.fetchRun.create({
       data: {
         status: 'SUCCESS',
@@ -240,5 +260,15 @@ describe('Read API (e2e)', () => {
       lastRun: { status: 'SUCCESS', newJobs: 2, newCompanies: 1 },
       today: { newJobs: 2, companies: 2 },
     });
+  });
+
+  it('hides board jobs not confirmed for over 8 days, but keeps LinkedIn-style jobs', async () => {
+    const all = await api('/api/jobs?view=all&q=stale').expect(200);
+    expect(all.body.total).toBe(0);
+    const companies = await api('/api/companies?view=all').expect(200);
+    const acme = companies.body.items.find((c: { name: string }) => c.name === 'Acme Payments');
+    expect(acme.openRoles).toBe(3);
+    // the 20-day-old job without a board (LinkedIn-style) is still listed
+    expect((await api('/api/jobs?view=all&q=designer').expect(200)).body.total).toBe(1);
   });
 });

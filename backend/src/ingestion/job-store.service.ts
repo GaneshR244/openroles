@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '../generated/prisma/client.js';
 import { JobStatus } from '../generated/prisma/enums.js';
 import type { JobSource } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -168,20 +169,78 @@ export class JobStoreService {
   }
 
   /**
-   * Set difference for one board: open jobs whose ID is not in today's response are closed.
-   * Call only after a successful read; the board lane applies the empty-response guard.
+   * Reposts: a board row whose role (fingerprint) is still listed today, but under a new ID,
+   * is pointed at the live posting so its link works and it is not closed as "missing".
+   * Covers "same job reposted with a new ID" and "two openings, one closed".
+   */
+  async relinkReposts(
+    boardId: string,
+    kept: readonly NormalizedJob[],
+    currentExternalIds: readonly string[],
+    now: Date,
+  ): Promise<number> {
+    const current = new Set(currentExternalIds);
+    const live = new Map(kept.map((j) => [j.fingerprint, j]));
+    let relinked = 0;
+    for (const part of chunk([...live.keys()])) {
+      const rows = await this.prisma.job.findMany({
+        where: { boardId, fingerprint: { in: part } },
+        select: { id: true, externalId: true, fingerprint: true },
+      });
+      for (const row of rows) {
+        if (current.has(row.externalId)) continue;
+        const job = live.get(row.fingerprint)!;
+        try {
+          await this.prisma.job.update({
+            where: { id: row.id },
+            data: {
+              externalId: job.externalId,
+              url: job.url,
+              postedAt: job.postedAt,
+              status: JobStatus.ACTIVE,
+              closedAt: null,
+              lastSeenAt: now,
+            },
+          });
+          relinked++;
+        } catch (err) {
+          // Another row already owns that (source, externalId): leave both as they are.
+          if (!(err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002')) {
+            throw err;
+          }
+        }
+      }
+    }
+    return relinked;
+  }
+
+  /**
+   * Set difference for one board: open jobs whose ID is not in today's response are closed,
+   * unless their role (fingerprint) is still listed. Call only after a successful, complete
+   * read; the board lane applies the empty-response and truncation guards.
    */
   async closeMissing(
     boardId: string,
     currentExternalIds: readonly string[],
     now: Date,
+    currentFingerprints: readonly string[] = [],
   ): Promise<number> {
     const result = await this.prisma.job.updateMany({
       where: {
         boardId,
         status: JobStatus.ACTIVE,
         externalId: { notIn: [...currentExternalIds] },
+        ...(currentFingerprints.length ? { fingerprint: { notIn: [...currentFingerprints] } } : {}),
       },
+      data: { status: JobStatus.CLOSED, closedAt: now },
+    });
+    return result.count;
+  }
+
+  /** Closes every open job of a board (used when a board is marked BROKEN). */
+  async closeAll(boardId: string, now: Date): Promise<number> {
+    const result = await this.prisma.job.updateMany({
+      where: { boardId, status: JobStatus.ACTIVE },
       data: { status: JobStatus.CLOSED, closedAt: now },
     });
     return result.count;

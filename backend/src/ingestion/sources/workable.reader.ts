@@ -36,7 +36,10 @@ export class WorkableReader implements BoardReader {
       total = data.total;
 
       const next = data.nextPage ?? undefined;
-      if (!next || next === token || data.results.length === 0) return { jobs, truncated: false };
+      if (!next || next === token || data.results.length === 0) {
+        // Stopping early while `total` says more jobs exist means the list is incomplete.
+        return { jobs, truncated: total != null && jobs.length < total };
+      }
       token = next;
     }
     // Stopped at maxPages with a nextPage in hand. A full last page always carries nextPage,

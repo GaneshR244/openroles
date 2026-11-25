@@ -142,4 +142,15 @@ describe('WorkableReader', () => {
     expect(error).toBeInstanceOf(SchemaChangedError);
     expect((error as SchemaChangedError).reason).toMatch(/^results\.3\.shortcode/);
   });
+
+  it('reports truncated when a page comes back empty while total says more jobs exist', async () => {
+    const { http, reader } = setup();
+    const first = fixture(); // 10 jobs with a nextPage token
+    first.total = 25;
+    http.postJson.mockResolvedValueOnce(first).mockResolvedValueOnce({ total: 25, results: [] });
+
+    const { jobs, truncated } = await reader.read('huggingface');
+    expect(jobs).toHaveLength(10);
+    expect(truncated).toBe(true);
+  });
 });

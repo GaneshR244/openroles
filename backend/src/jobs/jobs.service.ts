@@ -11,6 +11,8 @@ import type { CompanyItem, JobItem, Paged, RunSummary } from './jobs.types.js';
 // Read-only queries for the sales page. Every filter maps onto an index (docs/ARCHITECTURE.md §3.13).
 
 const STALE_HEARTBEAT_MS = 10 * 60_000;
+/** Board jobs not seen for this long are hidden: boards are re-read at least every 7 days. */
+const BOARD_FRESH_DAYS = 8;
 
 const jobSelect = {
   id: true,
@@ -60,12 +62,18 @@ export class JobsService {
     if (q.country) where.country = q.country;
     if (q.workMode) where.workMode = q.workMode;
     if (q.source) where.source = q.source;
+    const and: Prisma.JobWhereInput[] = [
+      { OR: [{ boardId: null }, { lastSeenAt: { gte: daysBefore(now, BOARD_FRESH_DAYS) } }] },
+    ];
     if (q.q) {
-      where.OR = [
-        { title: { contains: q.q, mode: 'insensitive' } },
-        { company: { name: { contains: q.q, mode: 'insensitive' } } },
-      ];
+      and.push({
+        OR: [
+          { title: { contains: q.q, mode: 'insensitive' } },
+          { company: { name: { contains: q.q, mode: 'insensitive' } } },
+        ],
+      });
     }
+    where.AND = and;
     return where;
   }
 
@@ -94,6 +102,7 @@ export class JobsService {
     const conditions: Prisma.Sql[] = [
       Prisma.sql`j."status" = 'ACTIVE'`,
       Prisma.sql`j."postedAt" >= ${this.cutoff(now)}`,
+      Prisma.sql`(j."boardId" IS NULL OR j."lastSeenAt" >= ${daysBefore(now, BOARD_FRESH_DAYS)})`,
     ];
     if (q.view === 'new') conditions.push(Prisma.sql`j."firstSeenAt" >= ${today}`);
     if (q.view === 'week') conditions.push(Prisma.sql`j."firstSeenAt" >= ${addDays(today, -6)}`);
@@ -150,7 +159,12 @@ export class JobsService {
     });
     if (!company) throw new NotFoundException('Company not found');
     const rows = await this.prisma.job.findMany({
-      where: { companyId: id, status: 'ACTIVE', postedAt: { gte: this.cutoff(now) } },
+      where: {
+        companyId: id,
+        status: 'ACTIVE',
+        postedAt: { gte: this.cutoff(now) },
+        OR: [{ boardId: null }, { lastSeenAt: { gte: daysBefore(now, BOARD_FRESH_DAYS) } }],
+      },
       orderBy: [{ postedAt: 'desc' }, { id: 'desc' }],
       select: jobSelect,
     });

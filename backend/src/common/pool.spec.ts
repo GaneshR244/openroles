@@ -33,4 +33,32 @@ describe('runPool', () => {
   it('handles an empty list', async () => {
     expect(await runPool([], 5, async () => {})).toBe(0);
   });
+
+  it('one failing item never stops the others; errors go to onError', async () => {
+    const done: number[] = [];
+    const failed: number[] = [];
+    await runPool(
+      [1, 2, 3, 4],
+      2,
+      async (n) => {
+        if (n === 2) throw new Error('db hiccup');
+        done.push(n);
+      },
+      undefined,
+      (n) => failed.push(n),
+    );
+    expect(done.sort((a, b) => a - b)).toEqual([1, 3, 4]);
+    expect(failed).toEqual([2]);
+  });
+
+  it('without onError, finishes every item and then rethrows the first error', async () => {
+    const done: number[] = [];
+    await expect(
+      runPool([1, 2, 3], 1, async (n) => {
+        if (n === 1) throw new Error('first');
+        done.push(n);
+      }),
+    ).rejects.toThrow('first');
+    expect(done).toEqual([2, 3]);
+  });
 });

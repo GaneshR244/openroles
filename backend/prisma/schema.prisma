@@ -68,6 +68,9 @@ model Company {
   updatedAt       DateTime  @updatedAt
   boards          Board[]
   jobs            Job[]
+
+  // Trigram index for the search box (pg_trgm, created in a migration). Declared so Prisma keeps it.
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "company_name_trgm")
 }
 
 model Board {
@@ -114,6 +117,9 @@ model Job {
   @@unique([source, externalId])
   @@index([firstSeenAt(sort: Desc)])
   @@index([status, country, postedAt(sort: Desc)])
+  @@index([status, postedAt(sort: Desc)])
+  // Trigram index for the search box (pg_trgm, created in a migration). Declared so Prisma keeps it.
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "job_title_trgm")
   @@index([boardId, status])
   @@index([companyId, status])
   @@index([lastSeenAt])

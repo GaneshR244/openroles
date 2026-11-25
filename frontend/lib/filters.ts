@@ -22,6 +22,7 @@ export const DEFAULT_VIEW: View = "new";
 export const DEFAULT_MODE: Mode = "jobs";
 export const DEFAULT_PAGE_SIZE = 50;
 export const MAX_PAGE_SIZE = 100; // the API rejects more
+export const MAX_PAGE = 10_000; // the API rejects more
 export const MIN_QUERY_LENGTH = 2;
 const MAX_QUERY_LENGTH = 100;
 
@@ -36,7 +37,7 @@ export function parseSearchParams(raw: RawSearchParams): PageState {
       workMode: oneOf(first(raw.workMode)?.toUpperCase(), WORK_MODES),
       source: oneOf(first(raw.source)?.toUpperCase(), SOURCES),
       q: normalizeQuery(first(raw.q)),
-      page: positiveInt(first(raw.page)) ?? 1,
+      page: Math.min(positiveInt(first(raw.page)) ?? 1, MAX_PAGE),
       pageSize: pageSize(first(raw.pageSize)),
     },
   };
