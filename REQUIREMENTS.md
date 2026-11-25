@@ -91,6 +91,6 @@ We do **not** collect job descriptions, years of experience, salary or skills. S
 
 ## Still open
 
-- **Where will the backend be hosted?** It needs an always-on server or container, because the morning run can take up to an hour.
+- ~~Where will the backend be hosted?~~ **AWS** (25 Nov 2026). The backend server runs the 6 AM job itself, the same way our other backend runs its scheduled jobs.
 - **Sales login:** not wanted for now (25 Nov 2026). The page only shows data.
 - ~~LinkedIn~~: **approved on 25 Nov 2026.** It reads the public job search while logged out, slowly, and stops when blocked.

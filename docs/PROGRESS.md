@@ -110,10 +110,22 @@ Approved by the user. Built and switched on (`LINKEDIN_ENABLED=true`).
 - **Now:** 582 roles first seen today at 221 companies (India 228, UAE 33, US 313). The sales page shows them; the UAE filter was checked.
 - **What to watch:** this laptop gets bot-checked after roughly 20–25 LinkedIn requests in one go, so a morning run will usually stop well before its 300-request budget, at about 200 jobs a day. If that holds, try slower pacing for LinkedIn (a longer gap in `host-policies.ts`). Never try to get around the block.
 
+## Daily cron inside the API (done, 25 Nov 2026)
+Decision with the user: we deploy on AWS, and mono-backend runs its crons with `@nestjs/schedule` (45 `@Cron` jobs, `DISABLE_CRONS` switch), so OpenRoles does the same. Details are in ARCHITECTURE.md, "As built: daily schedule".
+- **Built:**
+  - `src/schedule/daily-fetch.scheduler.ts`: `@Cron('0 0 6 * * *', { timeZone: 'Asia/Kolkata' })` calls the orchestrator. At start-up it catches up a missed 06:00 run. A failed run is logged and never crashes the API.
+  - `DailyFetchModule`, imported by `AppModule`
+  - `DISABLE_CRONS` setting (default false). Tests force it to true.
+- **Removed:** the macOS launchd file. Keeping the API running now covers the laptop case.
+- **Tests:** 5 unit (catch-up rule, India calendar day) and 7 integration (job registered for 06:00 IST, catch-up runs or skips, failure doesn't throw, the switch works).
+  - backend totals: 328 unit and 43 integration/API tests, all passing.
+  - lint, typecheck and build are clean.
+- **Live check:** the API was restarted and logged "daily fetch scheduled for 06:00 IST". There was no catch-up because today's 15:40 run counts.
+
 ## Not done yet
-- **Deployment and the production cron:** waiting for a hosting decision. The cron line is in the README.
+- **Deployment:** AWS is decided. The API (with its cron) needs to be deployed as an always-on service.
 - **Sales login:** not wanted for now (user, 25 Nov 2026). The page is view-only.
 
 ## Running locally right now
-- **Sales page:** http://localhost:3000 · **API:** http://localhost:4000/api/health
+- **Sales page:** http://localhost:3001 · **API:** http://localhost:4000/api/health (also fetches daily at 06:00 IST)
 - **Another fetch:** `cd backend && npm run jobs:fetch` · **probe more companies:** `npm run seed:yc -- --find-boards=200`

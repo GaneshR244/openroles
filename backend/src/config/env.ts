@@ -35,6 +35,8 @@ export const envSchema = z.object({
   MAX_COMPANY_PROBES: positiveInt(100),
   LINKEDIN_ENABLED: bool,
   LINKEDIN_MAX_REQUESTS: positiveInt(300),
+  /** true switches off the 06:00 IST fetch inside this API server (same name as mono-backend). */
+  DISABLE_CRONS: bool,
   SLACK_WEBHOOK_URL: z
     .string()
     .optional()

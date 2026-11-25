@@ -56,6 +56,15 @@ These override older wording below where they differ.
   - **Limits:** at 1,000 results a search is marked saturated.
   - **Running:** it runs in parallel with the board lane. LinkedIn retries a 429 only once, then stops.
 
+## As built: daily schedule (25 Nov 2026)
+This replaces the original D1 ("a batch script started by an outside cron").
+- **Why:** we deploy on AWS, and mono-backend runs all its crons (45 `@Cron` jobs) with `@nestjs/schedule` inside the app, switched off per server with `DISABLE_CRONS=true`. Using the same pattern means nothing new for DevOps. The usual risks of in-app crons are already covered here: the FetchRun lease lets only one run start across servers; a run killed by a restart frees its lease after 10 minutes, keeps what it saved, and the next run catches up.
+- **How:** `src/schedule/daily-fetch.scheduler.ts` has one `@Cron('0 0 6 * * *', { timeZone: 'Asia/Kolkata' })` that calls `RunOrchestratorService.run({ trigger: 'cron' })`. `DailyFetchModule` (`ScheduleModule.forRoot()` + `IngestionModule`) is imported by `AppModule`.
+- **Catch-up:** at API start-up, if it's past 06:00 IST and no SUCCESS/PARTIAL run has started since 06:00 that day, one run starts in the background. This covers a server that was down or restarting at 06:00.
+- **Off switch:** `DISABLE_CRONS=true` skips both the 06:00 tick and the catch-up. Tests set it, so booting `AppModule` never starts a real run.
+- **Manual runs:** unchanged. `npm run jobs:fetch` boots `IngestionModule` on its own and shares the same lease.
+- **Later option:** if the run grows long or heavy, move it to EventBridge Scheduler → ECS RunTask with the same image and `node dist/scripts/fetch-jobs.js --trigger=cron`, and set `DISABLE_CRONS=true` on the API. No code change is needed.
+
 ## 0. Scope
 
 **In scope (v1)**
@@ -95,7 +104,7 @@ These override older wording below where they differ.
 | N4 | Correctness over coverage | A source that can't be read reliably is skipped and reported |
 | N5 | Polite to sources | Per-host rate limits and backoff; never bypass blocks |
 | N6 | Observable | Every run writes a report; Slack alert on failure or anomaly |
-| N7 | Simple | Two apps, one database, one cron line, few dependencies |
+| N7 | Simple | Two apps, one database, one cron, few dependencies |
 
 ### Capacity estimates (v1)
 - **Boards:** about 1–3k after the YC seed, growing 50–100 a day from LinkedIn discovery. Adaptive polling keeps the boards due each day to about 40–60%.
@@ -115,7 +124,7 @@ These override older wording below where they differ.
 
 ### 2.1 Containers
 ```
-cron (06:00 IST) ──starts──▶ backend: fetch script (NestJS standalone context, exits when done)
+@Cron 06:00 IST (in the API) ──starts──▶ fetch run (same code as the manual script `fetch-jobs.ts`)
                                  │  reads public JSON/HTML (no API keys)
                                  ▼
                LinkedIn guest search · Greenhouse · Lever · Ashby · SmartRecruiters · Workable · YC list
@@ -147,7 +156,7 @@ cron (06:00 IST) ──starts──▶ backend: fetch script (NestJS standalone 
 ### 2.3 Key decisions
 | # | Decision | Why | Rejected alternative |
 |---|---|---|---|
-| D1 | A batch script started by cron | One run a day; isolated from the API; easy to rerun by hand | Always-on scheduler or BullMQ + Redis: more moving parts, no benefit at this scale |
+| D1 | A `@nestjs/schedule` cron inside the API (06:00 IST), plus a manual script; see "As built: daily schedule" | Same pattern as mono-backend on AWS; the FetchRun lease makes it safe with several servers; easy to rerun by hand | BullMQ + Redis: more moving parts. EventBridge → ECS task: kept as a later option |
 | D2 | Dedupe with PostgreSQL unique indexes + `ON CONFLICT DO NOTHING` | The database is the single source of truth, so dedupe is idempotent under reruns and crashes | In-memory caches or Bloom filters: state lost on crash; not needed at under 1M rows |
 | D3 | Closed jobs = set difference per board | One request per board shows every open job | Checking each job URL: thousands of extra requests |
 | D4 | Adaptive polling (1→2→4→7 days when unchanged) | Run time stays bounded as boards grow | Fixed daily polling: run time grows linearly |
@@ -198,8 +207,11 @@ ingestion/
     schemas.ts                  zod schemas per source
   sources.config.ts             LinkedIn searches, blocklist
 jobs/                           API: controller, service, DTOs, raw SQL for the companies view
+schedule/
+  daily-fetch.scheduler.ts      @Cron 06:00 IST + start-up catch-up (DISABLE_CRONS switches off)
+  daily-fetch.module.ts
 scripts/
-  fetch-jobs.ts                 daily entry point (cron)
+  fetch-jobs.ts                 manual run (same orchestrator)
   import-yc.ts                  one-time seed
 ```
 
@@ -565,11 +577,7 @@ No job source needs an API key.
   - The developer's own PostgreSQL 16 (the one pgAdmin connects to); no Docker needed
   - `npm run jobs:fetch:dev -- --source=lever` runs one source
 - **Backend image:** a multi-stage Dockerfile. The same image runs the API (`node dist/main.js`) and the script (`node dist/scripts/fetch-jobs.js`). `prisma migrate deploy` runs on release.
-- **Cron:** `30 0 * * *` (UTC) = 06:00 IST, running `npm run jobs:fetch`. It needs an always-on host:
-  - host crontab
-  - or a Kubernetes CronJob with `concurrencyPolicy: Forbid`, `activeDeadlineSeconds: 7200`
-  - or an ECS scheduled task
-  - Never a serverless function.
+- **Cron:** `@Cron('0 0 6 * * *', { timeZone: 'Asia/Kolkata' })` inside the API (see "As built: daily schedule"). Hosting is AWS: run the API as an always-on service (ECS or EC2), never a serverless function. With several API servers, set `DISABLE_CRONS=true` on all but one; the lease makes it safe either way.
 - **Frontend:** Vercel or the same host.
 - **CI (GitHub Actions):** install → lint → typecheck → test (Postgres service) → build, for both apps.
 
@@ -624,6 +632,6 @@ No job source needs an API key.
 - Tests and lint pass in both apps.
 
 ## 10. Open decisions
-- The lead's OK for LinkedIn. Without it, discovery is the YC list only, which is weak for India and the UAE. Plan B is paid data (TheirStack).
-- The hosting target for the backend and cron.
+- ~~The lead's OK for LinkedIn~~: approved 25 Nov 2026. Apify's LinkedIn scraper (about $1 per 1,000 jobs) is under discussion for more volume.
+- ~~The hosting target~~: AWS (25 Nov 2026). The API runs the daily cron.
 - How salespeople log in.

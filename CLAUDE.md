@@ -7,7 +7,7 @@ OpenRoles is an internal tool that shows Hyring's sales team which companies are
 - To build a phase, use the `openroles-build` skill (`.claude/skills/openroles-build/SKILL.md`).
 
 ## Stack
-- `backend/`: NestJS 12, Prisma 7, PostgreSQL. A daily fetch script started by cron, plus a read-only API.
+- `backend/`: NestJS 12, Prisma 7, PostgreSQL. A read-only API that also runs the daily fetch at 06:00 IST (`@nestjs/schedule`, `src/schedule/`). The same fetch can be run by hand: `npm run jobs:fetch`.
 - `frontend/`: Next.js 16 (App Router), Tailwind CSS 4, shadcn/ui.
 - Two folders in one repo, each with its own package.json. No monorepo tooling.
 - Progress log: `docs/PROGRESS.md`. Add a short entry for every phase.
@@ -37,7 +37,8 @@ OpenRoles is an internal tool that shows Hyring's sales team which companies are
 - **All outbound HTTP goes through `common/http/http-client.ts`** (per-host limits, retry, circuit breaker). Never call `fetch` directly from a reader.
 - **Validate every external response with its zod schema.** Parser tests use saved real responses in `backend/test/fixtures/`.
 - **LinkedIn:** logged-out guest search only, behind `LINKEDIN_ENABLED`. Never cookies, accounts, proxies or block bypassing.
-- **Dependencies:** no Puppeteer/Playwright, Redis, queues, `@nestjs/schedule`, telemetry SDKs or agent-skill bundles. Ask before adding any dependency not listed in the architecture doc.
+- **Daily fetch:** one `@Cron` in `src/schedule/daily-fetch.scheduler.ts` (06:00 IST) calls `RunOrchestratorService`. Keep run logic in the orchestrator so the cron and the manual script share it. `DISABLE_CRONS=true` switches the cron off on a server, and the FetchRun lease stops double runs across servers.
+- **Dependencies:** no Puppeteer/Playwright, Redis, queues, telemetry SDKs or agent-skill bundles. Ask before adding any dependency not listed in the architecture doc.
 - **Time:** store UTC; compute "today" in Asia/Kolkata.
 - **Secrets:** only in `.env` (git-ignored); commit `.env.example`. The frontend's `API_KEY` is server-side only, never `NEXT_PUBLIC_`.
 - **Build one phase at a time** (architecture §9) and stop for review after each.

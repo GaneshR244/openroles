@@ -10,7 +10,7 @@ An internal tool that shows Hyring's sales team which companies are hiring, for 
 ## How it fits together
 
 ```
-cron 06:00 IST ──▶ backend fetch script ──▶ public job boards (no API keys)
+06:00 IST cron (@nestjs/schedule, inside the API) ──▶ fetch run ──▶ public job boards (no API keys)
                           │                  Greenhouse · Lever · Ashby · SmartRecruiters · Workable
                           ▼                  + LinkedIn logged-out job search (20 cities)
                      PostgreSQL ◀── backend API (read-only, x-api-key) ◀── frontend (Next.js) ◀── sales team
@@ -40,7 +40,7 @@ npx prisma migrate deploy
 npm run build
 npm run seed:yc -- --find-boards=200   # one-time: import YC companies and find their job boards
 npm run jobs:fetch            # one morning run; prints a summary
-npm run start:prod            # API on http://localhost:4000/api (try /api/health)
+npm run start:prod            # API on http://localhost:4000/api (try /api/health); also fetches daily at 06:00 IST
 
 # 3. Frontend (another terminal)
 cd frontend
@@ -53,36 +53,18 @@ To work on the page without the backend: `OPENROLES_SAMPLE_DATA=1 npm run dev`. 
 
 ## Daily schedule
 
-The fetch must run on an always-on server or container, because a run can take up to 90 minutes. It can't run as a serverless function. Times are UTC:
+The API server runs the fetch by itself every day at **06:00 IST**, using NestJS's built-in scheduler (`@nestjs/schedule`). That's the same way mono-backend runs its crons. The code is in `backend/src/schedule/daily-fetch.scheduler.ts`.
 
-```cron
-30 0 * * *  cd /app/backend && node dist/scripts/fetch-jobs.js --trigger=cron   # 06:00 IST
-```
+- **Missed run:** if the server was down at 06:00, it runs the fetch once when it starts. It does this only if there's been no good run since 06:00 that day.
+- **Several API servers:** safe. The database lets only one run start, and the others skip. To keep the cron on one server, set `DISABLE_CRONS=true` on the rest (same flag as mono-backend).
+- **Switch it off** on any machine with `DISABLE_CRONS=true`.
+- **Always-on host needed:** a run can take up to 90 minutes, so the API must be an always-on server or container (on AWS: ECS or EC2), never a serverless function.
+- **On this Mac:** keep the API running (`npm run start:prod`). If the Mac was off at 06:00, the fetch runs when you next start the API.
 
-On Kubernetes, use a CronJob with `concurrencyPolicy: Forbid`. A second run started by mistake exits on its own anyway: the database allows only one running run at a time.
-
-**Useful flags:**
+**Run it by hand** (after `npm run build`):
+- `npm run jobs:fetch` runs one full fetch now.
 - `npm run jobs:fetch -- --source=lever` runs one board system only.
 - `npm run seed:yc -- --find-boards=N` probes N companies for boards right away. The daily run checks `MAX_COMPANY_PROBES` companies each morning.
-
-## Daily schedule on this Mac (until there is a server)
-
-`backend/deploy/com.openroles.fetch-jobs.plist` runs the fetch every day at 06:00 IST using macOS's scheduler. If the Mac is asleep then, it runs once on wake. Run `npm run build` in `backend/` first.
-
-```bash
-# switch on
-mkdir -p ~/projects/openroles/backend/logs
-cp ~/projects/openroles/backend/deploy/com.openroles.fetch-jobs.plist ~/Library/LaunchAgents/
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.openroles.fetch-jobs.plist
-
-# check / see the last run
-launchctl print gui/$(id -u)/com.openroles.fetch-jobs | grep -E "state|last exit"
-tail -20 ~/projects/openroles/backend/logs/fetch-jobs.log
-
-# switch off
-launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.openroles.fetch-jobs.plist
-rm ~/Library/LaunchAgents/com.openroles.fetch-jobs.plist
-```
 
 ## Scripts
 
@@ -101,10 +83,12 @@ All settings are in `backend/.env.example` and `frontend/.env.example`. None of 
 - **`API_KEY`** is a secret you generate; it's shared by the frontend and backend, and the frontend uses it server-side only.
 - **`TARGET_COUNTRIES`** picks the markets (default `IN,AE,US`).
 - **`LINKEDIN_ENABLED=true`** reads LinkedIn's logged-out job search (approved). `LINKEDIN_MAX_REQUESTS` caps the requests per morning (default 300). The lane stops for the day if LinkedIn blocks us.
+- **`DISABLE_CRONS=true`** stops this API server from running the 06:00 IST fetch (default: it runs).
 
 ## Deploying (not done yet)
 
-- **`backend/Dockerfile`** builds one image for both the API and the script. Run `npx prisma migrate deploy` once per release, then the API (`node dist/main.js`), plus the cron line above.
+- **Target: AWS.**
+- **`backend/Dockerfile`** builds one image. Run `npx prisma migrate deploy` once per release, then start the API (`node dist/main.js`) as an always-on service. It also runs the 06:00 IST fetch.
 - **The frontend** can go on Vercel or the same host.
 - **CI** (`.github/workflows/ci.yml`) lints, typechecks, tests and builds both apps.
-- **Still to decide:** hosting, and how salespeople log in.
+- **Still to decide:** how salespeople log in.

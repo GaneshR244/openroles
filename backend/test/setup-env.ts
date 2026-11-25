@@ -11,3 +11,5 @@ if (!testUrl) {
 }
 process.env['DATABASE_URL'] = testUrl;
 process.env['API_KEY'] ??= 'test-api-key-0123456789abcdef';
+// Tests that boot AppModule must never start a real fetch run.
+process.env['DISABLE_CRONS'] = 'true';

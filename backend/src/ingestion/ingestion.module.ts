@@ -17,8 +17,8 @@ import { ReporterService } from './reporter.service.js';
 import { RunOrchestratorService } from './run-orchestrator.service.js';
 import { YcImportService } from './yc-import.service.js';
 
-// Everything the daily fetch script needs. Booted on its own by scripts/fetch-jobs.ts,
-// never by the API server.
+// Everything a fetch run needs. Used by the API's 06:00 IST schedule (DailyFetchModule) and
+// booted on its own by the manual script (scripts/fetch-jobs.ts).
 @Module({
   imports: [AppConfigModule, PrismaModule],
   providers: [
