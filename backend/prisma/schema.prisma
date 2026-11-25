@@ -1,0 +1,133 @@
+// OpenRoles data model. Source of truth: docs/ARCHITECTURE.md §3.2.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Ats {
+  GREENHOUSE
+  LEVER
+  ASHBY
+  SMARTRECRUITERS
+  WORKABLE
+}
+
+enum JobSource {
+  LINKEDIN
+  GREENHOUSE
+  LEVER
+  ASHBY
+  SMARTRECRUITERS
+  WORKABLE
+}
+
+enum Country {
+  IN
+  AE
+  US
+}
+
+enum WorkMode {
+  ONSITE
+  HYBRID
+  REMOTE
+  UNKNOWN
+}
+
+enum JobStatus {
+  ACTIVE
+  CLOSED
+}
+
+enum BoardStatus {
+  ACTIVE
+  BROKEN
+}
+
+enum RunStatus {
+  RUNNING
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+model Company {
+  id              String    @id @default(cuid())
+  name            String // display name as first seen
+  normalizedName  String    @unique // dedupe key
+  website         String? // from YC; used for slug guesses
+  linkedinUrl     String?
+  discoveredVia   String // linkedin | yc | board | manual
+  boardsCheckedAt DateTime? // last board-finder probe
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  boards          Board[]
+  jobs            Job[]
+}
+
+model Board {
+  id                String      @id @default(cuid())
+  ats               Ats
+  slug              String // e.g. "cred" in jobs.lever.co/cred
+  status            BoardStatus @default(ACTIVE)
+  failCount         Int         @default(0) // consecutive failures; 3 -> BROKEN
+  emptyCount        Int         @default(0) // consecutive empty responses (guard)
+  fetchIntervalDays Int         @default(1) // adaptive: 1, 2, 4, 7
+  nextFetchAt       DateTime    @default(now())
+  lastFetchedAt     DateTime?
+  lastJobsHash      String? // sha1 of sorted external IDs
+  openJobs          Int         @default(0)
+  createdAt         DateTime    @default(now())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  jobs              Job[]
+
+  @@unique([ats, slug])
+  @@index([status, nextFetchAt])
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  source      JobSource
+  externalId  String
+  fingerprint String    @unique // sha1(company | title | location)
+  title       String
+  location    String?
+  country     Country? // null = plain "Remote" kept by the board rule
+  workMode    WorkMode  @default(UNKNOWN)
+  url         String
+  postedAt    DateTime // source date, or first-seen time if missing
+  firstSeenAt DateTime  @default(now()) // drives "New today"
+  lastSeenAt  DateTime  @default(now())
+  closedAt    DateTime?
+  status      JobStatus @default(ACTIVE)
+  companyId   String
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  boardId     String? // null for LinkedIn jobs
+  board       Board?    @relation(fields: [boardId], references: [id], onDelete: SetNull)
+
+  @@unique([source, externalId])
+  @@index([firstSeenAt(sort: Desc)])
+  @@index([status, country, postedAt(sort: Desc)])
+  @@index([boardId, status])
+  @@index([companyId, status])
+  @@index([lastSeenAt])
+}
+
+model FetchRun {
+  id          String    @id @default(cuid())
+  status      RunStatus @default(RUNNING)
+  trigger     String    @default("cron") // cron | manual
+  startedAt   DateTime  @default(now())
+  heartbeatAt DateTime  @default(now())
+  finishedAt  DateTime?
+  stats       Json?
+  error       String?
+
+  @@index([status, startedAt(sort: Desc)])
+}

@@ -1,0 +1,14 @@
+import { Controller, Get } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service.js';
+
+// GET /api/health: for uptime checks. Needs no API key (docs/ARCHITECTURE.md §3.13).
+@Controller('health')
+export class HealthController {
+  constructor(private readonly prisma: PrismaService) {}
+
+  @Get()
+  async check(): Promise<{ ok: boolean; db: boolean }> {
+    const db = await this.prisma.isHealthy();
+    return { ok: db, db };
+  }
+}

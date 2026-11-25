@@ -1,0 +1,15 @@
+# Local PostgreSQL for developers without a local install.
+# Not used on the original dev machine (Homebrew PostgreSQL 16 there), so this file is untested.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: openroles
+      POSTGRES_PASSWORD: openroles_local
+      POSTGRES_DB: openroles
+    ports:
+      - "5432:5432"
+    volumes:
+      - openroles_pg:/var/lib/postgresql/data
+volumes:
+  openroles_pg:
