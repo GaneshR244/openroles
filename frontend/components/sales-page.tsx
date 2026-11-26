@@ -1,7 +1,11 @@
+import { Suspense } from "react";
+
 import { FilterNavigationProvider, PendingArea } from "@/components/filter-navigation";
 import { Filters } from "@/components/filters";
 import { ModeToggle } from "@/components/mode-toggle";
+import { ResultsSummary } from "@/components/results-summary";
 import { RunStatusBanner } from "@/components/run-status-banner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CompanyResults, JobResults } from "@/components/sales-results";
 import { ViewTabs } from "@/components/view-tabs";
 import { getCountries } from "@/lib/api";
@@ -20,6 +24,11 @@ export async function SalesPage({ searchParams }: { searchParams: Promise<RawSea
           <ViewTabs />
           <ModeToggle />
         </div>
+        <PendingArea>
+          <Suspense fallback={<Skeleton className="h-6 w-80 max-w-full" />}>
+            <ResultsSummary filters={filters} />
+          </Suspense>
+        </PendingArea>
         <Filters countries={countries} />
         <PendingArea>
           {mode === "companies" ? (

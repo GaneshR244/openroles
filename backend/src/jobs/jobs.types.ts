@@ -42,3 +42,6 @@ export type RunSummary = {
 
 /** One country in the sales page's filter: open roles (within the age limit) per country. */
 export type CountryCount = { code: string; jobs: number };
+
+/** The summary line above the results: totals for the current view and filters. */
+export type JobSummary = { roles: number; companies: number; countries: number };

@@ -11,36 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CountryFilter } from "@/components/country-filter";
 import { useFilterNavigation } from "@/components/filter-navigation";
 import { SOURCES, normalizeQuery } from "@/lib/filters";
-import { countryLabel, SOURCE_LABELS } from "@/lib/labels";
+import { SOURCE_LABELS } from "@/lib/labels";
 import type { CountryCount } from "@/lib/types";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-const numberFormat = new Intl.NumberFormat("en-IN");
-
 /** `countries`: countries with open roles, most first (from the API). */
 export function Filters({ countries }: { countries: CountryCount[] }) {
   const { filters, navigate } = useFilterNavigation();
-  const countryOptions = countries.map(({ code, jobs }) => ({
-    value: code,
-    label: `${countryLabel(code)} (${numberFormat.format(jobs)})`,
-  }));
-  // A country from a shared link that has no roles right now still shows as selected.
-  if (filters.country && !countries.some((c) => c.code === filters.country)) {
-    countryOptions.unshift({ value: filters.country, label: countryLabel(filters.country) });
-  }
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
       <SearchBox />
-      <FilterSelect
-        label="Country"
-        allLabel="All countries"
-        value={filters.country}
-        options={countryOptions}
-        onChange={(country) => navigate({ country })}
-      />
+      <CountryFilter countries={countries} />
       <FilterSelect
         label="Source"
         allLabel="All sources"

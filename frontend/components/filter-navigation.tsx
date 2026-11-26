@@ -16,7 +16,7 @@ import { salesPageHref, type Mode, type PageState } from "@/lib/filters";
 import type { JobFilters } from "@/lib/types";
 
 export type FilterChange = Partial<
-  Pick<JobFilters, "view" | "country" | "source" | "q">
+  Pick<JobFilters, "view" | "country" | "source" | "q" | "pageSize">
 > & { mode?: Mode };
 
 type FilterNavigation = PageState & {

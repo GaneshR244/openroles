@@ -41,6 +41,9 @@ export type JobItem = {
 /** One country in the filter: open roles there (the "All open" view). */
 export type CountryCount = { code: Country; jobs: number };
 
+/** Totals for the current view and filters (the line above the results). */
+export type JobSummary = { roles: number; companies: number; countries: number };
+
 export type Paged<T> = {
   items: T[];
   total: number;

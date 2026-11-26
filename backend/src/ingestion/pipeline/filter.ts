@@ -1,7 +1,7 @@
 import { daysBefore } from '../../common/time.js';
 import type { RawJob } from '../sources/source.types.js';
 import { resolveCountries } from './country.js';
-import { fingerprint, normalizeCompany } from './normalize.js';
+import { cleanLocation, fingerprint, normalizeCompany } from './normalize.js';
 import type {
   BatchContext,
   CountryMatch,
@@ -77,7 +77,7 @@ function toCandidate(raw: RawJob, ctx: BatchContext): Candidate | null {
   const url = clean(raw.url);
   if (!externalId || !title || !companyName || !url) return null;
 
-  const location = clean(raw.locations[0]) || null;
+  const location = cleanLocation(clean(raw.locations[0])) || null;
   const companyLinkedinUrl = clean(raw.companyLinkedinUrl) || undefined;
 
   return {

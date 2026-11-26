@@ -227,6 +227,20 @@ describe('Read API (e2e)', () => {
     expect(res.body.total).toBe(0);
   });
 
+  it('sums up roles, companies and countries for the current filters', async () => {
+    const all = await api('/api/summary?view=all').expect(200);
+    const jobs = await api('/api/jobs?view=all').expect(200);
+    const companies = await api('/api/companies?view=all').expect(200);
+    expect(all.body).toEqual({
+      roles: jobs.body.total,
+      companies: companies.body.total,
+      countries: 3,
+    });
+    const india = await api('/api/summary?view=all&country=IN').expect(200);
+    expect(india.body.countries).toBe(1);
+    expect(india.body.roles).toBeLessThan(all.body.roles);
+  });
+
   it('lists countries with open roles, most first, matching the jobs list', async () => {
     const res = await api('/api/countries').expect(200);
     const countries = res.body as { code: string; jobs: number }[];

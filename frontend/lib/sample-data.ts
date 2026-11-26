@@ -6,6 +6,7 @@ import { startOfDayIST } from "./format";
 import type {
   CompanyItem,
   CountryCount,
+  JobSummary,
   Country,
   JobFilters,
   JobItem,
@@ -122,6 +123,15 @@ export function sampleCompanyJobs(
     .filter((job) => job.company.id === id)
     .sort(byNewestFirstSeen);
   return { company: companyItem(company, jobs, startOfDayIST(now)), jobs };
+}
+
+export function sampleSummary(filters: JobFilters, now: number): JobSummary {
+  const jobs = filterJobs(allJobs(now), filters, now);
+  return {
+    roles: jobs.length,
+    companies: new Set(jobs.map((job) => job.company.id)).size,
+    countries: new Set(jobs.map((job) => job.country).filter(Boolean)).size,
+  };
 }
 
 export function sampleCountries(now: number): CountryCount[] {

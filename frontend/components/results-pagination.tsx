@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { PageSizeSelect } from "@/components/page-size-select";
 import {
   Pagination,
   PaginationContent,
@@ -21,7 +22,7 @@ type ResultsPaginationProps = {
   noun: [one: string, many: string];
 };
 
-/** "Showing 1–50 of 312 roles" plus page links. Links keep every other filter. */
+/** Rows per page, "Showing 1–50 of 312 roles" and page links. Links keep every other filter. */
 export function ResultsPagination({ filters, mode, total, noun }: ResultsPaginationProps) {
   const { page, pageSize } = filters;
   const lastPage = Math.max(1, Math.ceil(total / pageSize));
@@ -31,10 +32,13 @@ export function ResultsPagination({ filters, mode, total, noun }: ResultsPaginat
 
   return (
     <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-      <p className="text-sm text-muted-foreground">
-        Showing {formatCount(from)}–{formatCount(to)} of {formatCount(total)}{" "}
-        {total === 1 ? noun[0] : noun[1]}
-      </p>
+      <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
+        <PageSizeSelect />
+        <p className="text-sm text-muted-foreground">
+          Showing {formatCount(from)}–{formatCount(to)} of {formatCount(total)}{" "}
+          {total === 1 ? noun[0] : noun[1]}
+        </p>
+      </div>
       {lastPage > 1 && (
         <Pagination className="mx-0 w-auto">
           <PaginationContent>

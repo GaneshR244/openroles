@@ -1,4 +1,5 @@
 import {
+  cleanLocation,
   fingerprint,
   normalizeCompany,
   normalizeLocation,
@@ -113,5 +114,19 @@ describe('fingerprint', () => {
     expect(fingerprint('Acme', 'Engineer', 'Mumbai')).not.toBe(base);
     expect(fingerprint('Acme', 'Designer', 'Pune')).not.toBe(base);
     expect(fingerprint('Globex', 'Engineer', 'Pune')).not.toBe(base);
+  });
+});
+
+describe('cleanLocation', () => {
+  it.each([
+    ['Hyderabad, , India', 'Hyderabad, India'],
+    ['United States, UNITED STATES', 'United States'],
+    ['Singapore, Singapore', 'Singapore'],
+    ['New York, New York, United States', 'New York, New York, United States'],
+    [' Pune ,Maharashtra, India ', 'Pune, Maharashtra, India'],
+    [', ,', ''],
+    ['Remote', 'Remote'],
+  ])('%j -> %j', (text, expected) => {
+    expect(cleanLocation(text)).toBe(expected);
   });
 });

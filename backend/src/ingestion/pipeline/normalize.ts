@@ -84,3 +84,18 @@ export function fingerprint(
   const key = `${normalizeCompany(company)}|${normalizeTitle(title)}|${normalizeLocation(location)}`;
   return createHash('sha1').update(key).digest('hex');
 }
+
+/**
+ * Tidies a location for display: drops empty parts and a last part that repeats the one before
+ * it. "Hyderabad, , India" -> "Hyderabad, India"; "United States, UNITED STATES" -> "United States".
+ */
+export function cleanLocation(text: string): string {
+  const parts = text
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const last = parts.at(-1);
+  const beforeLast = parts.at(-2);
+  if (last && beforeLast && last.toLowerCase() === beforeLast.toLowerCase()) parts.pop();
+  return parts.join(', ');
+}

@@ -18,6 +18,8 @@ export const SOURCES: readonly JobSource[] = [
 export const DEFAULT_VIEW: View = "new";
 export const DEFAULT_MODE: Mode = "jobs";
 export const DEFAULT_PAGE_SIZE = 50;
+/** Choices for "Rows per page". */
+export const PAGE_SIZES: readonly number[] = [10, 25, 50, 100];
 export const MAX_PAGE_SIZE = 100; // the API rejects more
 export const MAX_PAGE = 10_000; // the API rejects more
 export const MIN_QUERY_LENGTH = 2;

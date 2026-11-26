@@ -6,7 +6,14 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { type AppConfig, setting } from '../config/app-config.js';
 import { addDays, daysBefore, startOfIstDay } from '../common/time.js';
 import { jobQuerySchema, type JobQuery } from './jobs.schemas.js';
-import type { CompanyItem, CountryCount, JobItem, Paged, RunSummary } from './jobs.types.js';
+import type {
+  CompanyItem,
+  CountryCount,
+  JobItem,
+  JobSummary,
+  Paged,
+  RunSummary,
+} from './jobs.types.js';
 
 // Read-only queries for the sales page. Every filter maps onto an index (docs/ARCHITECTURE.md §3.13).
 
@@ -111,8 +118,8 @@ export class JobsService {
     return { items: rows.map(toJobItem), total, page: q.page, pageSize: q.pageSize };
   }
 
-  /** Same filters, one row per company. Raw SQL because Prisma can't group with a filtered count. */
-  async listCompanies(q: JobQuery, now = new Date()): Promise<Paged<CompanyItem>> {
+  /** The page's filters as SQL, for the raw queries (alias j = Job, c = Company). */
+  private sqlWhere(q: JobQuery, now: Date): Prisma.Sql {
     const today = startOfIstDay(now);
     const conditions: Prisma.Sql[] = [
       Prisma.sql`j."status" = 'ACTIVE'`,
@@ -128,7 +135,24 @@ export class JobsService {
       const p = likePattern(q.q);
       conditions.push(Prisma.sql`(j."title" ILIKE ${p} OR c."name" ILIKE ${p})`);
     }
-    const where = Prisma.join(conditions, ' AND ');
+    return Prisma.join(conditions, ' AND ');
+  }
+
+  /** Totals for the page's summary line: roles, companies and countries for these filters. */
+  async summary(q: JobQuery, now = new Date()): Promise<JobSummary> {
+    const [row] = await this.prisma.$queryRaw<JobSummary[]>`
+      SELECT COUNT(*)::int AS "roles",
+             COUNT(DISTINCT j."companyId")::int AS "companies",
+             COUNT(DISTINCT j."country")::int AS "countries"
+      FROM "Job" j JOIN "Company" c ON c."id" = j."companyId"
+      WHERE ${this.sqlWhere(q, now)}`;
+    return row ?? { roles: 0, companies: 0, countries: 0 };
+  }
+
+  /** Same filters, one row per company. Raw SQL because Prisma can't group with a filtered count. */
+  async listCompanies(q: JobQuery, now = new Date()): Promise<Paged<CompanyItem>> {
+    const today = startOfIstDay(now);
+    const where = this.sqlWhere(q, now);
 
     const rows = await this.prisma.$queryRaw<
       {
