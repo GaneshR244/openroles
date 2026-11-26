@@ -122,6 +122,28 @@ Decision with the user: we deploy on AWS, and mono-backend runs its crons with `
   - lint, typecheck and build are clean.
 - **Live check:** the API was restarted and logged "daily fetch scheduled for 06:00 IST". There was no catch-up because today's 15:40 run counts.
 
+## Every country, Common Crawl board import, sales page upgrades (done, 26 Nov 2026)
+Asked by the user: remove the country limit, and find "all companies" on Greenhouse, Lever and Ashby the way other job scrapers do.
+- **Every country:**
+  - `Job.country` is now any ISO code; the migration changed the column in place, with no data lost.
+  - `TARGET_COUNTRIES=ALL` is the default (local `.env` switched to ALL). A list still narrows it.
+  - World country names, aliases and about 300 big cities are in `pipeline/world-places.ts`.
+- **Common Crawl board import:** see ARCHITECTURE.md, "As built: Common Crawl board import". It runs inside the morning run every 30 days, or on demand with `npm run boards:import`.
+- **Sales page:**
+  - a country filter you can type in, with counts
+  - a totals line (roles · companies · countries) from the new `GET /api/summary`
+  - rows per page (10, 25, 50 or 100)
+- **Locations** are tidied in the pipeline ("Hyderabad, , India" → "Hyderabad, India"). A one-off script fixed 10,491 saved jobs and recomputed their fingerprints.
+- **Tests:** backend 374 unit and 54 integration/API tests, all passing. Lint, typecheck and builds are clean for both apps.
+- **First import run (26 Nov, 08:27–09:07 IST, PARTIAL only because LinkedIn blocked us):**
+  - Common Crawl: 2 crawls, 61 index pages, 8,230 boards found. 8,200 checked: 6,391 added, 649 with no open jobs, 1,158 gone. The import is complete, so the next one is due in 30 days.
+  - Three index pages answered HTTP 400 and were skipped.
+  - Boards now: Greenhouse 3,839 · Ashby 1,536 · SmartRecruiters 916 · Lever 196.
+  - 136,482 new roles and 6,211 new companies in 40 minutes. Open roles: 137,506 at 5,585 companies in 174 countries (US 65,818 · UK 8,568 · France 8,112 · Germany 7,339 · Canada 4,823 · India 4,039 · UAE 756; 7,651 with no country we can tell).
+- **To watch:**
+  - Lever is thin in Common Crawl (196 boards). Scanning more crawls would find more.
+  - Normal daily runs should take 10–20 minutes, because quiet boards are read less often.
+
 ## Not done yet
 - **Deployment:** AWS is decided. The API (with its cron) needs to be deployed as an always-on service.
 - **Sales login:** not wanted for now (user, 25 Nov 2026). The page is view-only.
