@@ -8,3 +8,6 @@ coverage
 
 /src/generated/prisma
 logs
+
+# TypeScript incremental build info
+*.tsbuildinfo
