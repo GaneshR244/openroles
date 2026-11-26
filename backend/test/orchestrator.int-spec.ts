@@ -1,6 +1,7 @@
 import type { TestingModule } from '@nestjs/testing';
 import { BoardLaneService } from '../src/ingestion/board-lane.service.js';
 import { BoardFinderService } from '../src/ingestion/board-finder.service.js';
+import { BoardImportService, emptyImportStats } from '../src/ingestion/board-import.service.js';
 import {
   LinkedInLaneService,
   disabledLinkedInStats,
@@ -30,6 +31,10 @@ const readers = {
     read: async () => ({ jobs: [raw('1'), raw('2'), raw('3')], truncated: false }),
   }),
 };
+const boardImport = {
+  isDue: vi.fn(async () => false),
+  run: vi.fn(async () => ({ ...emptyImportStats(), crawls: ['CC-TEST'], complete: true })),
+};
 const finder = {
   run: async () => ({
     probedCompanies: 0,
@@ -53,6 +58,7 @@ describe('RunOrchestratorService (integration, real PostgreSQL)', () => {
       ReporterService,
       { provide: BoardReaders, useValue: readers },
       { provide: BoardFinderService, useValue: finder },
+      { provide: BoardImportService, useValue: boardImport },
       { provide: LinkedInLaneService, useValue: { run: async () => disabledLinkedInStats() } },
     ]);
     orchestrator = moduleRef.get(RunOrchestratorService);
@@ -106,6 +112,29 @@ describe('RunOrchestratorService (integration, real PostgreSQL)', () => {
     expect(r2.stats.totals.newJobs).toBe(0);
     expect(r2.stats.boards.unchanged).toBe(1);
     expect(await prisma.job.count()).toBe(3);
+  });
+
+  it('runs the board import only when due or forced, and records it', async () => {
+    boardImport.run.mockClear();
+    const skipped = await orchestrator.run({ trigger: 'manual' });
+    if (skipped.status === 'SKIPPED') throw new Error('unexpected skip');
+    expect(boardImport.run).not.toHaveBeenCalled();
+    expect(skipped.stats.boardImport).toBeNull();
+
+    const forced = await orchestrator.run({ trigger: 'manual', importBoards: 'force' });
+    if (forced.status === 'SKIPPED') throw new Error('unexpected skip');
+    expect(boardImport.run).toHaveBeenCalledOnce();
+    const row = await prisma.fetchRun.findUniqueOrThrow({ where: { id: forced.runId } });
+    expect((row.stats as any).boardImport).toMatchObject({ crawls: ['CC-TEST'], complete: true });
+  });
+
+  it('a failing board import never stops the run', async () => {
+    boardImport.run.mockRejectedValueOnce(new Error('Common Crawl is down'));
+    const r = await orchestrator.run({ trigger: 'manual', importBoards: 'force' });
+    if (r.status === 'SKIPPED') throw new Error('unexpected skip');
+    expect(r.status).toBe('SUCCESS');
+    expect(r.stats.boardImport).toBeNull();
+    expect(r.stats.totals.newJobs).toBe(3);
   });
 
   it('skips when another run holds the lease', async () => {

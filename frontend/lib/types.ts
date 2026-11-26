@@ -1,7 +1,8 @@
 // API contract between the NestJS backend and this app (docs/ARCHITECTURE.md §3.13).
 // The backend's responses must match these shapes exactly.
 
-export type Country = "IN" | "AE" | "US";
+/** ISO 3166-1 alpha-2 country code ("IN", "DE"). */
+export type Country = string;
 export type WorkMode = "ONSITE" | "HYBRID" | "REMOTE" | "UNKNOWN";
 export type JobSource =
   | "LINKEDIN"
@@ -36,6 +37,9 @@ export type JobItem = {
   postedAt: string;
   firstSeenAt: string;
 };
+
+/** One country in the filter: open roles there (the "All open" view). */
+export type CountryCount = { code: Country; jobs: number };
 
 export type Paged<T> = {
   items: T[];

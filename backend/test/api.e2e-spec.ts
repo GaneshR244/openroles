@@ -218,8 +218,25 @@ describe('Read API (e2e)', () => {
 
   it('rejects bad query parameters with 400', async () => {
     await api('/api/jobs?view=yesterday').expect(400);
-    await api('/api/jobs?country=FR').expect(400);
+    await api('/api/jobs?country=France').expect(400);
     await api('/api/jobs?pageSize=500').expect(400);
+  });
+
+  it('accepts any two-letter country code', async () => {
+    const res = await api('/api/jobs?view=all&country=fr').expect(200);
+    expect(res.body.total).toBe(0);
+  });
+
+  it('lists countries with open roles, most first, matching the jobs list', async () => {
+    const res = await api('/api/countries').expect(200);
+    const countries = res.body as { code: string; jobs: number }[];
+    expect(countries.map((c) => c.code).sort()).toEqual(['AE', 'IN', 'US']);
+    const counts = countries.map((c) => c.jobs);
+    expect(counts).toEqual([...counts].sort((a, b) => b - a));
+    for (const { code, jobs } of countries) {
+      const list = await api(`/api/jobs?view=all&country=${code}`).expect(200);
+      expect(list.body.total).toBe(jobs);
+    }
   });
 
   it('groups by company, most new roles first', async () => {

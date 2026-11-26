@@ -9,7 +9,8 @@ describe('validateEnv', () => {
   it('applies defaults', () => {
     const env = validateEnv(base);
     expect(env.PORT).toBe(4000);
-    expect(env.TARGET_COUNTRIES).toEqual(['IN', 'AE', 'US']);
+    expect(env.TARGET_COUNTRIES).toEqual([]); // every country
+    expect(env.MAX_BOARDS_PER_RUN).toBe(20000);
     expect(env.MAX_JOB_AGE_DAYS).toBe(30);
     expect(env.LINKEDIN_ENABLED).toBe(false);
     expect(env.SLACK_WEBHOOK_URL).toBeUndefined();
@@ -21,8 +22,18 @@ describe('validateEnv', () => {
     expect(env.LINKEDIN_ENABLED).toBe(true);
   });
 
-  it('rejects an unknown country', () => {
-    expect(() => validateEnv({ ...base, TARGET_COUNTRIES: 'IN,FR' })).toThrow(/TARGET_COUNTRIES/);
+  it('reads ALL as every country and accepts any two-letter code', () => {
+    expect(validateEnv({ ...base, TARGET_COUNTRIES: 'all' }).TARGET_COUNTRIES).toEqual([]);
+    expect(validateEnv({ ...base, TARGET_COUNTRIES: 'IN,fr' }).TARGET_COUNTRIES).toEqual([
+      'IN',
+      'FR',
+    ]);
+  });
+
+  it('rejects a country that is not a two-letter code', () => {
+    expect(() => validateEnv({ ...base, TARGET_COUNTRIES: 'IN,India' })).toThrow(
+      /TARGET_COUNTRIES/,
+    );
   });
 
   it('rejects a missing database url and a short api key', () => {

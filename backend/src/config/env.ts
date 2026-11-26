@@ -3,9 +3,6 @@ import { z } from 'zod';
 // Environment settings, validated once at boot (docs/ARCHITECTURE.md §3.14).
 // A wrong or missing value stops the app with a clear message instead of failing later.
 
-const COUNTRY_CODES = ['IN', 'AE', 'US'] as const;
-export type TargetCountry = (typeof COUNTRY_CODES)[number];
-
 const bool = z
   .enum(['true', 'false', '1', '0', ''])
   .default('false')
@@ -18,20 +15,23 @@ export const envSchema = z.object({
   PORT: positiveInt(4000),
   API_KEY: z.string().min(16, 'API_KEY must be at least 16 characters'),
   FRONTEND_ORIGIN: z.string().default('http://localhost:3000'),
+  /** ISO codes to keep, e.g. "IN,AE,US". "ALL" or empty keeps every country (the default). */
   TARGET_COUNTRIES: z
     .string()
-    .default('IN,AE,US')
+    .default('ALL')
     .transform((v) =>
-      v
-        .split(',')
-        .map((c) => c.trim().toUpperCase())
-        .filter(Boolean),
+      v.trim().toUpperCase() === 'ALL'
+        ? []
+        : v
+            .split(',')
+            .map((c) => c.trim().toUpperCase())
+            .filter(Boolean),
     )
-    .pipe(z.array(z.enum(COUNTRY_CODES)).min(1)),
+    .pipe(z.array(z.string().regex(/^[A-Z]{2}$/, 'use two-letter ISO country codes'))),
   MAX_JOB_AGE_DAYS: positiveInt(30),
   RETENTION_DAYS: positiveInt(90),
   RUN_DEADLINE_MINUTES: positiveInt(90),
-  MAX_BOARDS_PER_RUN: positiveInt(5000),
+  MAX_BOARDS_PER_RUN: positiveInt(20000),
   MAX_COMPANY_PROBES: positiveInt(100),
   LINKEDIN_ENABLED: bool,
   LINKEDIN_MAX_REQUESTS: positiveInt(300),

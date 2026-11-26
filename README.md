@@ -1,6 +1,6 @@
 # OpenRoles
 
-An internal tool that shows Hyring's sales team which companies are hiring, for which role, with a link to the live job post. Every morning a script collects new public job posts for India, the UAE and the US, saves each role once, and a sales page lists them.
+An internal tool that shows Hyring's sales team which companies are hiring, for which role, with a link to the live job post. Every morning it collects new public job posts from every country, saves each role once, and a sales page lists them.
 
 - What and why: [`REQUIREMENTS.md`](REQUIREMENTS.md)
 - How it works (HLD + LLD): [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
@@ -12,6 +12,7 @@ An internal tool that shows Hyring's sales team which companies are hiring, for 
 ```
 06:00 IST cron (@nestjs/schedule, inside the API) ──▶ fetch run ──▶ public job boards (no API keys)
                           │                  Greenhouse · Lever · Ashby · SmartRecruiters · Workable
+                          │                  boards found monthly in Common Crawl (free web archive)
                           ▼                  + LinkedIn logged-out job search (20 cities)
                      PostgreSQL ◀── backend API (read-only, x-api-key) ◀── frontend (Next.js) ◀── sales team
 ```
@@ -63,6 +64,7 @@ The API server runs the fetch by itself every day at **06:00 IST**, using NestJS
 
 **Run it by hand** (after `npm run build`):
 - `npm run jobs:fetch` runs one full fetch now.
+- `npm run boards:import` runs one full fetch with a fresh Common Crawl board import (otherwise the import runs by itself every 30 days).
 - `npm run jobs:fetch -- --source=lever` runs one board system only.
 - `npm run seed:yc -- --find-boards=N` probes N companies for boards right away. The daily run checks `MAX_COMPANY_PROBES` companies each morning.
 
@@ -81,7 +83,8 @@ The API server runs the fetch by itself every day at **06:00 IST**, using NestJS
 
 All settings are in `backend/.env.example` and `frontend/.env.example`. None of the job sources needs an API key.
 - **`API_KEY`** is a secret you generate; it's shared by the frontend and backend, and the frontend uses it server-side only.
-- **`TARGET_COUNTRIES`** picks the markets (default `IN,AE,US`).
+- **`TARGET_COUNTRIES`** picks the countries to keep, as ISO codes (`IN,AE,US`). The default `ALL` keeps every country.
+- **`MAX_BOARDS_PER_RUN`** caps the boards read in one run (default 20,000).
 - **`LINKEDIN_ENABLED=true`** reads LinkedIn's logged-out job search (approved). `LINKEDIN_MAX_REQUESTS` caps the requests per morning (default 300). The lane stops for the day if LinkedIn blocks us.
 - **`DISABLE_CRONS=true`** stops this API server from running the 06:00 IST fetch (default: it runs).
 

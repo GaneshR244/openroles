@@ -85,7 +85,7 @@ export class LinkedInLaneService {
     const targets = new Set<string>(setting(this.config, 'TARGET_COUNTRIES'));
     const budget = setting(this.config, 'LINKEDIN_MAX_REQUESTS');
     const states: SearchState[] = [...(opts.searches ?? LINKEDIN_SEARCHES)]
-      .filter((s) => targets.has(s.country))
+      .filter((s) => targets.size === 0 || targets.has(s.country))
       .sort((a, b) => a.priority - b.priority) // stable: config order breaks ties
       .map((search) => ({ search, start: 0, done: false, buffer: [] }));
     const seen = new Set<string>(); // the same posting often shows up in two city searches

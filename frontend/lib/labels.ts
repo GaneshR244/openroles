@@ -1,11 +1,19 @@
-// Display labels for the enum values in the API contract.
+// Display labels for the values in the API contract.
 import type { Country, JobSource, View } from "./types";
 
-export const COUNTRY_LABELS: Record<Country, string> = {
-  IN: "India",
-  AE: "UAE",
-  US: "US",
-};
+/** Short names people use; every other code gets its English name. */
+const COUNTRY_SHORT_NAMES: Record<string, string> = { AE: "UAE", US: "US", GB: "UK" };
+const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+
+/** "IN" -> "India", "AE" -> "UAE", "DE" -> "Germany". Unknown codes show as they are. */
+export function countryLabel(code: Country): string {
+  if (COUNTRY_SHORT_NAMES[code]) return COUNTRY_SHORT_NAMES[code];
+  try {
+    return regionNames.of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
 
 export const SOURCE_LABELS: Record<JobSource, string> = {
   LINKEDIN: "LinkedIn",

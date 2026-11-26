@@ -47,6 +47,7 @@ We do **not** collect job descriptions, years of experience, salary or skills. S
   - Ashby
   - SmartRecruiters
   - Workable
+- **Common Crawl** (a free public web archive), to find every company that has a Greenhouse, Lever, Ashby or SmartRecruiters job board. Refreshed once a month. Added 26 Nov 2026.
 - **The YC company list**, to find companies that are hiring.
 - **Maybe later:**
   - Recruitee, Personio and Teamtailor (they work, but mostly cover European companies)
@@ -55,11 +56,11 @@ We do **not** collect job descriptions, years of experience, salary or skills. S
 
 ## Who we target
 
-- Companies in **India, the UAE and the US**: Hyring's markets.
+- **Every country** (changed 26 Nov 2026; it was India, the UAE and the US). Sales can filter by country on the page.
 - **All kinds of roles**, and **all work types**: onsite, hybrid and remote.
-  - A remote job counts when it names one of our countries ("Remote - India").
-  - A plain "Remote" job counts when the same company also has jobs in our countries.
-- **The countries are a setting** (`TARGET_COUNTRIES=IN,AE,US`), so adding one later doesn't need code changes.
+  - With every country on, remote jobs are all kept; a job whose location names no country shows without one.
+  - If `TARGET_COUNTRIES` is narrowed, a remote job counts when it names one of those countries ("Remote - India"), and a plain "Remote" job counts when the same company also has jobs there.
+- **The countries are a setting:** `TARGET_COUNTRIES=ALL` (the default) keeps every country; a list such as `IN,AE,US` narrows it, with no code change.
 - **All sizes of company:** startups, mid-size and big.
 - **Recruitment agencies stay in the list.** They are Hyring customers too.
 - **No target company list from sales.** We find the companies ourselves.

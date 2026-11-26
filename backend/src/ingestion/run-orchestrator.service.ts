@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { type AppConfig, setting } from '../config/app-config.js';
 import { BoardLaneService, type BoardLaneStats } from './board-lane.service.js';
 import { BoardFinderService } from './board-finder.service.js';
+import { BoardImportService, type BoardImportStats } from './board-import.service.js';
 import {
   LinkedInLaneService,
   disabledLinkedInStats,
@@ -15,8 +16,8 @@ import { RetentionService } from './retention.service.js';
 import { ReporterService } from './reporter.service.js';
 import { decideStatus, type RunStats } from './run-stats.js';
 
-// The morning run (docs/ARCHITECTURE.md §3.11): lease → lanes → board finder → second board
-// pass → retention → report. Every step is safe to repeat.
+// The morning run (docs/ARCHITECTURE.md §3.11): lease → board import (monthly) → lanes → board
+// finder → second board pass → retention → report. Every step is safe to repeat.
 
 const HOUR = 3_600_000;
 const STALE_LEASE_MS = 10 * 60_000;
@@ -24,8 +25,10 @@ const HEARTBEAT_MS = 60_000;
 
 export type RunOptions = {
   trigger: 'cron' | 'manual';
-  /** Run one board system only (skips LinkedIn and the board finder). */
+  /** Run one board system only (skips the board import, LinkedIn and the board finder). */
   only?: Ats;
+  /** Common Crawl board import: 'auto' runs it when due (monthly), 'force' always, 'skip' never. */
+  importBoards?: 'auto' | 'force' | 'skip';
   /** Clock override for tests. */
   now?: Date;
 };
@@ -52,6 +55,7 @@ export class RunOrchestratorService {
     private readonly prisma: PrismaService,
     private readonly boardLane: BoardLaneService,
     private readonly finder: BoardFinderService,
+    private readonly boardImport: BoardImportService,
     private readonly linkedin: LinkedInLaneService,
     private readonly retention: RetentionService,
     private readonly reporter: ReporterService,
@@ -90,6 +94,7 @@ export class RunOrchestratorService {
         setting(this.config, 'MAX_JOB_AGE_DAYS'),
       );
       const linkedinEnabled = setting(this.config, 'LINKEDIN_ENABLED') && !opts.only;
+      const boardImport = await this.importBoards(opts, startedAt, deadline);
 
       // Lanes run in parallel: they call different hosts.
       const [boardsResult, linkedinResult] = await Promise.allSettled([
@@ -127,6 +132,7 @@ export class RunOrchestratorService {
       });
       const base = {
         window: { since: new Date(startedAt.getTime() - seconds * 1000).toISOString(), seconds },
+        boardImport,
         linkedin,
         boards,
         boardsSecondPass,
@@ -164,6 +170,23 @@ export class RunOrchestratorService {
       throw err;
     } finally {
       clearInterval(heartbeat);
+    }
+  }
+
+  /** The monthly Common Crawl board import. A failure is logged and never stops the run. */
+  private async importBoards(
+    opts: RunOptions,
+    now: Date,
+    deadline: Date,
+  ): Promise<BoardImportStats | null> {
+    const mode = opts.importBoards ?? 'auto';
+    if (opts.only || mode === 'skip') return null;
+    try {
+      if (mode === 'auto' && !(await this.boardImport.isDue(now))) return null;
+      return await this.boardImport.run({ now, deadline });
+    } catch (err) {
+      this.logger.error(`board import failed: ${(err as Error)?.message ?? err}`);
+      return null;
     }
   }
 

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { RelativeTime } from "@/components/relative-time";
 import { SourceBadge } from "@/components/source-badge";
-import { COUNTRY_LABELS } from "@/lib/labels";
+import { countryLabel } from "@/lib/labels";
 import type { JobItem } from "@/lib/types";
 
 type JobsTableProps = {
@@ -80,6 +80,6 @@ export function JobsTable({ jobs, now, showCompany = true }: JobsTableProps) {
 
 function jobLocation(job: JobItem): string {
   if (job.location) return job.location;
-  if (job.country) return COUNTRY_LABELS[job.country];
+  if (job.country) return countryLabel(job.country);
   return "–";
 }

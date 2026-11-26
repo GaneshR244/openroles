@@ -1,7 +1,7 @@
 import { Controller, Get, Header, Param, Query } from '@nestjs/common';
 import { JobsService } from './jobs.service.js';
 import { companyIdSchema, jobQuerySchema, type JobQuery } from './jobs.schemas.js';
-import type { CompanyItem, JobItem, Paged, RunSummary } from './jobs.types.js';
+import type { CompanyItem, CountryCount, JobItem, Paged, RunSummary } from './jobs.types.js';
 
 // Read-only API for the sales page. All routes need x-api-key (global ApiKeyGuard).
 // Data changes once a day, so short private caching is safe.
@@ -30,6 +30,12 @@ export class JobsController {
     @Param('id', { schema: companyIdSchema }) id: string,
   ): Promise<{ company: CompanyItem; jobs: JobItem[] }> {
     return this.jobs.companyJobs(id);
+  }
+
+  @Get('countries')
+  @Header('Cache-Control', CACHE)
+  countries(): Promise<CountryCount[]> {
+    return this.jobs.countries();
   }
 
   @Get('runs/latest')

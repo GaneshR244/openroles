@@ -7,7 +7,14 @@ const emptyToUndefined = (v: unknown) => (v === '' ? undefined : v);
 
 export const jobQuerySchema = z.object({
   view: z.enum(['new', 'week', 'all']).default('new'),
-  country: z.preprocess(emptyToUndefined, z.enum(['IN', 'AE', 'US']).optional()),
+  country: z.preprocess(
+    emptyToUndefined,
+    z
+      .string()
+      .regex(/^[A-Za-z]{2}$/)
+      .transform((c) => c.toUpperCase())
+      .optional(),
+  ),
   workMode: z.preprocess(emptyToUndefined, z.enum(['ONSITE', 'HYBRID', 'REMOTE']).optional()),
   source: z.preprocess(
     emptyToUndefined,

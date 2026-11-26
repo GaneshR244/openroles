@@ -1,12 +1,13 @@
 // Response shapes. They mirror frontend/lib/types.ts exactly; change both together.
-import type { Country, JobSource, RunStatus, WorkMode } from '../generated/prisma/enums.js';
+import type { JobSource, RunStatus, WorkMode } from '../generated/prisma/enums.js';
 
 export type JobItem = {
   id: string;
   title: string;
   company: { id: string; name: string };
   location: string | null;
-  country: Country | null;
+  /** ISO 3166-1 alpha-2 code, or null when unknown. */
+  country: string | null;
   workMode: WorkMode;
   url: string;
   source: JobSource;
@@ -38,3 +39,6 @@ export type RunSummary = {
   isRunning: boolean;
   today: { newJobs: number; companies: number };
 };
+
+/** One country in the sales page's filter: open roles (within the age limit) per country. */
+export type CountryCount = { code: string; jobs: number };

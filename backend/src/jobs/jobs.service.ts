@@ -5,8 +5,8 @@ import type { JobSource } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { type AppConfig, setting } from '../config/app-config.js';
 import { addDays, daysBefore, startOfIstDay } from '../common/time.js';
-import type { JobQuery } from './jobs.schemas.js';
-import type { CompanyItem, JobItem, Paged, RunSummary } from './jobs.types.js';
+import { jobQuerySchema, type JobQuery } from './jobs.schemas.js';
+import type { CompanyItem, CountryCount, JobItem, Paged, RunSummary } from './jobs.types.js';
 
 // Read-only queries for the sales page. Every filter maps onto an index (docs/ARCHITECTURE.md §3.13).
 
@@ -51,6 +51,21 @@ export class JobsService {
 
   private cutoff(now: Date): Date {
     return daysBefore(now, setting(this.config, 'MAX_JOB_AGE_DAYS'));
+  }
+
+  /**
+   * Countries with open roles (the same jobs as the "All open" view), most roles first. Jobs
+   * with no known country are left out.
+   */
+  async countries(now: Date = new Date()): Promise<CountryCount[]> {
+    const allOpen = this.jobWhere(jobQuerySchema.parse({ view: 'all' }), now);
+    const rows = await this.prisma.job.groupBy({
+      by: ['country'],
+      where: { ...allOpen, country: { not: null } },
+      _count: { _all: true },
+      orderBy: { _count: { country: 'desc' } },
+    });
+    return rows.map((r) => ({ code: r.country!, jobs: r._count._all }));
   }
 
   /** Time window per view: new = first seen since IST midnight, week = last 7 IST days, all = posted within the age limit. */
@@ -106,7 +121,7 @@ export class JobsService {
     ];
     if (q.view === 'new') conditions.push(Prisma.sql`j."firstSeenAt" >= ${today}`);
     if (q.view === 'week') conditions.push(Prisma.sql`j."firstSeenAt" >= ${addDays(today, -6)}`);
-    if (q.country) conditions.push(Prisma.sql`j."country" = ${q.country}::"Country"`);
+    if (q.country) conditions.push(Prisma.sql`j."country" = ${q.country}`);
     if (q.workMode) conditions.push(Prisma.sql`j."workMode" = ${q.workMode}::"WorkMode"`);
     if (q.source) conditions.push(Prisma.sql`j."source" = ${q.source}::"JobSource"`);
     if (q.q) {

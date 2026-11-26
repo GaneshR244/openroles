@@ -49,6 +49,9 @@ export function summaryText(
     stats.linkedin.enabled
       ? `LinkedIn: ${fmt(stats.linkedin.requests)} requests · ${fmt(stats.linkedin.cards)} cards · ${stats.linkedin.blocked ? 'BLOCKED' : 'not blocked'}`
       : 'LinkedIn: off',
+    stats.boardImport
+      ? `Board import (Common Crawl): ${fmt(stats.boardImport.boardsFound)} boards found · ${fmt(stats.boardImport.checked)} checked · ${fmt(stats.boardImport.added)} added${stats.boardImport.complete ? '' : ' · not finished, continues next run'}`
+      : '',
     stats.finder
       ? `Board finder: ${fmt(stats.finder.probedCompanies)} companies checked · ${fmt(stats.finder.boardsFound)} new boards`
       : '',

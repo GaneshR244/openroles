@@ -4,11 +4,14 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { RunStatusBanner } from "@/components/run-status-banner";
 import { CompanyResults, JobResults } from "@/components/sales-results";
 import { ViewTabs } from "@/components/view-tabs";
+import { getCountries } from "@/lib/api";
 import { parseSearchParams, type RawSearchParams } from "@/lib/filters";
 
 /** Everything on the sales page that depends on the URL. Render it inside <Suspense>. */
 export async function SalesPage({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
   const { filters, mode } = parseSearchParams(await searchParams);
+  // The filter still works (with no country list) if this call fails.
+  const countries = await getCountries().catch(() => []);
   return (
     <FilterNavigationProvider filters={filters} mode={mode}>
       <div className="flex flex-col gap-4">
@@ -17,7 +20,7 @@ export async function SalesPage({ searchParams }: { searchParams: Promise<RawSea
           <ViewTabs />
           <ModeToggle />
         </div>
-        <Filters />
+        <Filters countries={countries} />
         <PendingArea>
           {mode === "companies" ? (
             <CompanyResults filters={filters} mode={mode} />

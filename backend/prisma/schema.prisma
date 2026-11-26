@@ -26,12 +26,6 @@ enum JobSource {
   WORKABLE
 }
 
-enum Country {
-  IN
-  AE
-  US
-}
-
 enum WorkMode {
   ONSITE
   HYBRID
@@ -101,7 +95,7 @@ model Job {
   fingerprint String    @unique // sha1(company | title | location)
   title       String
   location    String?
-  country     Country? // null = plain "Remote" kept by the board rule
+  country     String? // ISO 3166-1 alpha-2 ("IN", "DE"); null = no country we can tell
   workMode    WorkMode  @default(UNKNOWN)
   url         String
   postedAt    DateTime // source date, or first-seen time if missing

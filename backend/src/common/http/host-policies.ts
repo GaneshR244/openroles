@@ -57,6 +57,16 @@ const HOST_POLICIES: Record<string, HostPolicy> = {
   'api.smartrecruiters.com': ATS_API,
   'apply.workable.com': WORKABLE,
   'yc-oss.github.io': { concurrency: 1, minGapMs: 0, userAgent: OPENROLES_USER_AGENT },
+  /** Common Crawl's index is a shared free service: one request at a time, slow retries. */
+  'index.commoncrawl.org': {
+    concurrency: 1,
+    minGapMs: 1_000,
+    jitterMs: 1_000,
+    breaker: true,
+    userAgent: OPENROLES_USER_AGENT,
+    retryBaseMs: 5_000,
+    retryCapMs: 60_000,
+  },
 };
 
 export const DEFAULT_POLICY: HostPolicy = {

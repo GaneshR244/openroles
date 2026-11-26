@@ -1,7 +1,7 @@
 import "server-only";
 
 import { requestNow } from "./now";
-import type { CompanyItem, JobFilters, JobItem, Paged, RunSummary } from "./types";
+import type { CompanyItem, CountryCount, JobFilters, JobItem, Paged, RunSummary } from "./types";
 
 /** A failed call to the OpenRoles API. `status` is the HTTP status, or 0 when no response arrived. */
 export class ApiError extends Error {
@@ -42,6 +42,15 @@ export async function getCompanyJobs(
     return result;
   }
   return apiGet(`/api/companies/${encodeURIComponent(id)}/jobs`);
+}
+
+/** Countries with open roles, most first, for the country filter. */
+export async function getCountries(): Promise<CountryCount[]> {
+  if (sampleDataEnabled()) {
+    const sample = await import("./sample-data");
+    return sample.sampleCountries(await requestNow());
+  }
+  return apiGet("/api/countries");
 }
 
 export async function getRunSummary(): Promise<RunSummary> {

@@ -1,8 +1,7 @@
-import type { Country } from '../generated/prisma/enums.js';
-
 // What to fetch (docs/ARCHITECTURE.md §3.10). Changes here go through code review.
 
-export type LinkedInSearch = { location: string; country: Country; priority: number };
+/** `country` is the ISO code jobs from this search get when their location is unclear. */
+export type LinkedInSearch = { location: string; country: string; priority: number };
 
 /** City searches for the LinkedIn lane (used only when LINKEDIN_ENABLED=true). Lower priority runs first. */
 export const LINKEDIN_SEARCHES: readonly LinkedInSearch[] = [

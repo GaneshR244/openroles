@@ -6,7 +6,6 @@ export type RawSearchParams = Record<string, string | string[] | undefined>;
 
 export const VIEWS: readonly View[] = ["new", "week", "all"];
 export const MODES: readonly Mode[] = ["jobs", "companies"];
-export const COUNTRIES: readonly Country[] = ["IN", "AE", "US"];
 export const SOURCES: readonly JobSource[] = [
   "LINKEDIN",
   "GREENHOUSE",
@@ -31,7 +30,7 @@ export function parseSearchParams(raw: RawSearchParams): PageState {
     mode: oneOf(first(raw.mode), MODES) ?? DEFAULT_MODE,
     filters: {
       view: oneOf(first(raw.view), VIEWS) ?? DEFAULT_VIEW,
-      country: oneOf(first(raw.country)?.toUpperCase(), COUNTRIES),
+      country: countryCode(first(raw.country)),
       source: oneOf(first(raw.source)?.toUpperCase(), SOURCES),
       q: normalizeQuery(first(raw.q)),
       page: Math.min(positiveInt(first(raw.page)) ?? 1, MAX_PAGE),
@@ -73,6 +72,12 @@ export function hasActiveFilters(filters: JobFilters): boolean {
 /** The same view and page size with every narrowing filter removed. */
 export function clearFilters(filters: JobFilters): JobFilters {
   return { view: filters.view, page: 1, pageSize: filters.pageSize };
+}
+
+/** A two-letter ISO country code, upper-cased, or undefined. */
+function countryCode(value: string | undefined): Country | undefined {
+  const code = value?.trim().toUpperCase();
+  return code && /^[A-Z]{2}$/.test(code) ? code : undefined;
 }
 
 function first(value: string | string[] | undefined): string | undefined {

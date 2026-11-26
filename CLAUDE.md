@@ -1,6 +1,6 @@
 # OpenRoles
 
-OpenRoles is an internal tool that shows Hyring's sales team which companies are hiring, for which role, with a link to the live job post. It covers India, the UAE and the US, all roles, all company sizes and all work types. Recruitment agencies are included because they are customers.
+OpenRoles is an internal tool that shows Hyring's sales team which companies are hiring, for which role, with a link to the live job post. It covers every country by default (`TARGET_COUNTRIES` can narrow it), all roles, all company sizes and all work types. Recruitment agencies are included because they are customers.
 
 - What and why, in plain language: `REQUIREMENTS.md`
 - How (HLD + LLD), the source of truth for code: `docs/ARCHITECTURE.md`
@@ -29,13 +29,14 @@ OpenRoles is an internal tool that shows Hyring's sales team which companies are
 ## Rules
 - Simple, readable, well-structured code. Small files, clear names, no clever abstractions.
 - Follow `docs/ARCHITECTURE.md`. If code needs to differ, update the doc in the same change and say why.
-- **Store per job only:** company, title, location, country, work mode, URL, posted date, source, external ID. Never descriptions, salary, skills or experience.
+- **Store per job only:** company, title, location, country (ISO 3166-1 alpha-2 code, or null), work mode, URL, posted date, source, external ID. Never descriptions, salary, skills or experience.
 - **Dedupe is enforced by the database:** unique `(source, externalId)` and unique `fingerprint`, with `createMany({ skipDuplicates: true })`. Never rely on in-memory state for correctness.
 - **Every run must be safe to repeat.**
 - **One failing board or source must never stop the run.**
 - **Correctness over coverage:** if a source can't be read reliably, skip it and report it.
 - **All outbound HTTP goes through `common/http/http-client.ts`** (per-host limits, retry, circuit breaker). Never call `fetch` directly from a reader.
 - **Validate every external response with its zod schema.** Parser tests use saved real responses in `backend/test/fixtures/`.
+- **Finding boards:** the monthly Common Crawl import (`ingestion/board-import.service.ts`) finds Greenhouse, Lever, Ashby and SmartRecruiters boards; the board finder guesses boards for companies we already know. Never probe Workable in bulk (it rate-limits for a day).
 - **LinkedIn:** logged-out guest search only, behind `LINKEDIN_ENABLED`. Never cookies, accounts, proxies or block bypassing.
 - **Daily fetch:** one `@Cron` in `src/schedule/daily-fetch.scheduler.ts` (06:00 IST) calls `RunOrchestratorService`. Keep run logic in the orchestrator so the cron and the manual script share it. `DISABLE_CRONS=true` switches the cron off on a server, and the FetchRun lease stops double runs across servers.
 - **Dependencies:** no Puppeteer/Playwright, Redis, queues, telemetry SDKs or agent-skill bundles. Ask before adding any dependency not listed in the architecture doc.

@@ -117,3 +117,14 @@ export function parseResponse<S extends z.ZodType>(
   const path = issue.path.length > 0 ? issue.path.join('.') : '(root)';
   throw new SchemaChangedError(url, `${path}: ${issue.message}`);
 }
+
+/** Common Crawl's list of crawls, newest first (https://index.commoncrawl.org/collinfo.json). */
+export const commonCrawlCollectionsSchema = z
+  .array(z.object({ id: z.string().min(1), 'cdx-api': z.string().min(1) }))
+  .min(1);
+
+/** CDX index answer to `showNumPages=true`. */
+export const cdxPagesSchema = z.object({ pages: z.number().int().nonnegative() });
+
+/** One line of a CDX index page asked for with `output=json&fl=url`. */
+export const cdxRecordSchema = z.object({ url: z.string().min(1) });

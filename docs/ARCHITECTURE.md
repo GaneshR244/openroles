@@ -65,6 +65,27 @@ This replaces the original D1 ("a batch script started by an outside cron").
 - **Manual runs:** unchanged. `npm run jobs:fetch` boots `IngestionModule` on its own and shares the same lease.
 - **Later option:** if the run grows long or heavy, move it to EventBridge Scheduler → ECS RunTask with the same image and `node dist/scripts/fetch-jobs.js --trigger=cron`, and set `DISABLE_CRONS=true` on the API. No code change is needed.
 
+## As built: every country (26 Nov 2026)
+Replaces the IN/AE/US-only design in §3.6 and the `Country` enum in §3.2. Requested by the user.
+- **Data:** `Job.country` is now text holding an ISO 3166-1 alpha-2 code, or null when the location names no country we can tell. The migration changed the column in place (`ALTER COLUMN ... TYPE TEXT`), so no data was lost.
+- **Setting:** `TARGET_COUNTRIES=ALL` (the default) keeps every country. A list such as `IN,AE,US` narrows it, using the old rules: LinkedIn jobs keep their search's country, and a plain "Remote" job is kept only on a board that also hires in a target country.
+- **Resolving a country** (`pipeline/country.ts`, `resolveCountries`): returns every country a job points to, best first.
+  - Structured codes come first ("IN", "IND", "UK", "Germany").
+  - Then each location in order. Within a location: a safe US "City, ST" → country names → cities and states → a listed US "City, ST" → a fallback for cities that also exist elsewhere ("London" → GB, used only when nothing else matched).
+  - Data: `country-data.ts` (India, UAE, US in depth) plus `world-places.ts` (every country's names and aliases, about 300 big cities, ISO3 codes).
+- **API:** `country` accepts any two-letter code. `GET /api/countries` lists countries with open roles, most first, using the same jobs as the "All open" view.
+- **Page:** the country filter lists those countries with counts; names come from `Intl.DisplayNames`.
+
+## As built: Common Crawl board import (26 Nov 2026)
+Greenhouse, Lever, Ashby and SmartRecruiters have no "list every company" API. The industry's standard way to find their boards is to scan a web archive for their board URLs.
+- **Source:** Common Crawl's public CDX index (`index.commoncrawl.org`), the two newest crawls. For each board host (`boards.greenhouse.io`, `job-boards.greenhouse.io`, `jobs.lever.co`, `jobs.ashbyhq.com`, `jobs.smartrecruiters.com`, `careers.smartrecruiters.com`) it reads every index page of crawled URLs (`url=host/*&output=json&fl=url`).
+- **Board names:** taken from the first path part (`boardFromUrl`), or Greenhouse's `embed?for=`. Site pages and files are skipped. Ashby and SmartRecruiters names keep their case; the others are lower-cased.
+- **Check:** each board we don't have yet gets one quick read through the normal reader. Boards with open jobs are saved with `nextFetchAt = now`, and the board lane reads them in the same run. Boards with no jobs or a 404 are skipped (the next month's import looks again).
+- **Companies:** the name from the API (Greenhouse, SmartRecruiters), otherwise from the board name ("acme-corp" → "Acme Corp"). An existing company with that name and no board is reused. If the name belongs to a company that already has a board, a separate company is created (`normalizedName` gets a `#ats:slug` suffix), because same-name companies are common.
+- **When:** inside the morning run, before the lanes, when no *complete* import finished in the last 30 days (`FetchRun.stats.boardImport.complete`). It's time-boxed to 45 minutes and 40,000 checks; if it doesn't finish, it carries on the next morning. `npm run boards:import` forces one. A failed import is logged and never stops the run.
+- **Politeness:** one request at a time to Common Crawl, 1–2 s apart, slow retries. Board checks go through the normal per-host limits (4 at a time per ATS). Workable is not imported: it rate-limits for a day.
+- **Scale:** `MAX_BOARDS_PER_RUN` default raised to 20,000.
+
 ## 0. Scope
 
 **In scope (v1)**

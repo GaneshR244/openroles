@@ -46,6 +46,7 @@ const base = (b: BoardLaneStats) => ({
     blocked: false,
     errors: 0,
   },
+  boardImport: null,
   boards: b,
   boardsSecondPass: null,
   finder: null,

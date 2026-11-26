@@ -241,3 +241,44 @@ describe('prepareBatch', () => {
     expect(result.dropped).toEqual(drops({ duplicate_in_batch: 1 }));
   });
 });
+
+describe('prepareBatch: every country (TARGET_COUNTRIES=ALL)', () => {
+  const worldwide = (overrides: Partial<BatchContext> = {}) =>
+    boardCtx({ targetCountries: [], ...overrides });
+
+  it('keeps jobs anywhere, with their country', () => {
+    const { kept, dropped } = prepareBatch(
+      [
+        raw({ externalId: '1', title: 'A', locations: ['Berlin, Germany'] }),
+        raw({ externalId: '2', title: 'B', locations: ['Remote - EMEA'] }),
+        raw({ externalId: '3', title: 'C', locations: ['Remote'] }),
+        raw({ externalId: '4', title: 'D', locations: ['Toronto, ON'], countryCodes: ['CA'] }),
+      ],
+      worldwide(),
+    );
+    expect(kept.map((j) => [j.externalId, j.country])).toEqual([
+      ['1', 'DE'],
+      ['2', null],
+      ['3', null],
+      ['4', 'CA'],
+    ]);
+    expect(dropped).toEqual(drops());
+  });
+
+  it('still drops old jobs', () => {
+    const { kept, dropped } = prepareBatch(
+      [raw({ postedAt: new Date('2026-09-01T00:00:00Z'), locations: ['Paris'] })],
+      worldwide(),
+    );
+    expect(kept).toEqual([]);
+    expect(dropped).toEqual(drops({ too_old: 1 }));
+  });
+
+  it('gives an unclear LinkedIn job its search country', () => {
+    const { kept } = prepareBatch(
+      [raw({ source: 'LINKEDIN', locations: ['Remote'] })],
+      worldwide({ isBoard: false, searchCountry: 'AE' }),
+    );
+    expect(kept[0]!.country).toBe('AE');
+  });
+});

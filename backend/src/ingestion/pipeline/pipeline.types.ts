@@ -1,7 +1,11 @@
-import type { Country, JobSource, WorkMode } from '../../generated/prisma/enums.js';
+import type { JobSource, WorkMode } from '../../generated/prisma/enums.js';
 
-/** Result of resolving where a job is. OUT = clearly outside our markets. */
-export type CountryResult = Country | 'OUT' | null;
+/** Where a job points (see country.ts). Codes are ISO 3166-1 alpha-2, best first. */
+export type CountryMatch = {
+  countries: string[];
+  /** Nothing to go on but "remote", or no location at all. */
+  plainRemote: boolean;
+};
 
 /** A cleaned job, ready for the job store (docs/ARCHITECTURE.md §3.5–3.7). */
 export type NormalizedJob = {
@@ -15,8 +19,8 @@ export type NormalizedJob = {
   companyLinkedinUrl?: string;
   /** Primary location text, trimmed. */
   location: string | null;
-  /** null only for a plain "Remote" job kept by the board rule. */
-  country: Country | null;
+  /** ISO 3166-1 alpha-2 code; null when the location names no country we can tell. */
+  country: string | null;
   workMode: WorkMode;
   url: string;
   /** Source date, or `now` when the source has none. */
@@ -39,11 +43,12 @@ export type DropReason =
 export type BatchContext = {
   now: Date;
   maxAgeDays: number;
-  targetCountries: readonly Country[];
+  /** ISO codes to keep. Empty means every country. */
+  targetCountries: readonly string[];
   /** Board jobs: the Board's company name, which wins over the source's own name. */
   companyName?: string;
   /** LinkedIn jobs: the country of the search that found them. */
-  searchCountry?: Country;
+  searchCountry?: string;
   /** true for a company board (the plain-remote board rule applies). */
   isBoard: boolean;
   /** Normalized company names to drop. Never contains recruitment agencies. */

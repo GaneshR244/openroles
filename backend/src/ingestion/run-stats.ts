@@ -1,12 +1,15 @@
 import type { RunStatus } from '../generated/prisma/enums.js';
 import type { BoardLaneStats } from './board-lane.service.js';
 import type { FinderStats } from './board-finder.service.js';
+import type { BoardImportStats } from './board-import.service.js';
 import type { LinkedInStats } from './linkedin-lane.service.js';
 
 /** Shape of FetchRun.stats (docs/ARCHITECTURE.md §3.11). */
 export type RunStats = {
   durationMs: number;
   window: { since: string; seconds: number };
+  /** Common Crawl board import; null on runs where it wasn't due. */
+  boardImport: BoardImportStats | null;
   linkedin: LinkedInStats;
   boards: BoardLaneStats;
   boardsSecondPass: BoardLaneStats | null;
@@ -33,6 +36,7 @@ export function decideStatus(stats: Omit<RunStats, 'durationMs' | 'partialReason
     reasons.push('deadline');
   }
   if (stats.linkedin.blocked) reasons.push('linkedin_blocked');
+  if (stats.boardImport && !stats.boardImport.complete) reasons.push('board_import_unfinished');
   if (due > 0 && failed / due > BOARD_FAILURE_PARTIAL_SHARE) reasons.push('many_board_failures');
   const nothingWorked =
     due > 0 && read === 0 && (!stats.linkedin.enabled || stats.linkedin.cards === 0);

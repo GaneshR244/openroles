@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Ats } from '../generated/prisma/enums.js';
-import type { Country } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { type AppConfig, setting } from '../config/app-config.js';
 import { HttpError, NotFoundError, isHostBlockedError } from '../common/http/errors.js';
@@ -10,7 +9,7 @@ import { daysBefore } from '../common/time.js';
 import { BoardReaders } from './sources/board-readers.js';
 import type { RawJob } from './sources/source.types.js';
 import { normalizeCompany } from './pipeline/normalize.js';
-import { resolveCountry } from './pipeline/country.js';
+import { resolveCountries } from './pipeline/country.js';
 
 // Finds public ATS boards for companies we already know (docs/ARCHITECTURE.md §3.9).
 
@@ -127,13 +126,13 @@ export function slugCandidates(
 /**
  * A probe hit counts only if the board has jobs, the name matches (the API's company name,
  * or the slug equals our cleaned name exactly), its job links don't point to another
- * company's website, and at least one job is in our markets.
+ * company's website, and (when TARGET_COUNTRIES is set) at least one job is in those countries.
  */
 export function verifyHit(
   jobs: readonly RawJob[],
   company: Pick<Candidate, 'normalizedName'> & { website?: string | null },
   slug: string,
-  targetCountries: readonly Country[],
+  targetCountries: readonly string[],
 ): boolean {
   if (jobs.length === 0) return false;
   if (domainConflicts(jobs, company.website ?? null)) return false;
@@ -142,13 +141,13 @@ export function verifyHit(
   const slugMatches =
     slug.toLowerCase().replace(/-/g, '') === company.normalizedName.replace(/ /g, '');
   if (!nameMatches && !slugMatches) return false;
-  return jobs.some((j) => {
-    const c = resolveCountry(
-      { locations: j.locations, countryCodes: j.countryCodes },
-      { targetCountries },
-    );
-    return c !== null && c !== 'OUT';
-  });
+  if (targetCountries.length === 0) return true;
+  const targets = new Set(targetCountries);
+  return jobs.some((j) =>
+    resolveCountries({ locations: j.locations, countryCodes: j.countryCodes }).countries.some(
+      (c) => targets.has(c),
+    ),
+  );
 }
 
 @Injectable()
@@ -244,7 +243,7 @@ export class BoardFinderService {
   /** Tries each ATS in parallel; within one ATS, guesses run in order until one verifies. */
   private async probeCompany(
     company: Candidate,
-    targetCountries: readonly Country[],
+    targetCountries: readonly string[],
     stats: FinderStats,
   ): Promise<{ ats: Ats; slug: string }[]> {
     const results = await Promise.all(

@@ -9,7 +9,7 @@ export default function Home({ searchParams }: PageProps<"/">) {
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight">Hiring companies</h1>
         <p className="text-sm text-muted-foreground">
-          Who is hiring in India, the UAE and the US, with a link to each live job post.
+          Who is hiring, where, and for which role, with a link to each live job post.
         </p>
       </header>
       {/* The header is static; the rest depends on the URL and streams in. */}

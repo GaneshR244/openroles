@@ -24,6 +24,7 @@
     "db:migrate:dev": "prisma migrate dev",
     "jobs:fetch": "node dist/scripts/fetch-jobs.js",
     "jobs:fetch:dev": "npm run build && node dist/scripts/fetch-jobs.js",
+    "boards:import": "node dist/scripts/fetch-jobs.js --import-boards",
     "seed:yc": "node dist/scripts/import-yc.js"
   },
   "dependencies": {
