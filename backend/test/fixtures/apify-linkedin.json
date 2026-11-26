@@ -1,0 +1,50 @@
+[
+  {
+    "id": "4330222739",
+    "link": "https://www.linkedin.com/jobs/view/sr-application-engineer-at-cadence-4330222739?position=1&pageNum=0&refId=abc",
+    "title": "Sr Application Engineer",
+    "companyName": "Cadence",
+    "companyLinkedinUrl": "https://in.linkedin.com/company/cadence-design-systems?trk=public_jobs_topcard-org-name",
+    "companyLogo": "https://media.licdn.com/dms/image/x/logo.png",
+    "location": "Bengaluru, Karnataka, India",
+    "salaryInfo": [],
+    "postedAt": "2026-11-25",
+    "benefits": [],
+    "descriptionHtml": "<p>About the role…</p>",
+    "applicantsCount": "25",
+    "descriptionText": "About the role…",
+    "jobPosterName": "Sample Recruiter",
+    "jobPosterTitle": "Talent Partner",
+    "jobPosterProfileUrl": "https://in.linkedin.com/in/sample-recruiter",
+    "seniorityLevel": "Mid-Senior level",
+    "employmentType": "Full-time",
+    "jobFunction": "Engineering",
+    "industries": "Software Development"
+  },
+  {
+    "id": 4331000001,
+    "link": "https://ae.linkedin.com/jobs/view/sales-manager-at-falcon-trading-4331000001",
+    "title": "Sales Manager",
+    "companyName": "Falcon Trading LLC",
+    "companyLinkedinUrl": "https://ae.linkedin.com/company/falcon-trading",
+    "location": "Dubai, United Arab Emirates",
+    "postedAt": "2026-11-26",
+    "postedAtTimestamp": 1795651200000,
+    "employmentType": "Full-time"
+  },
+  {
+    "id": "4331000002",
+    "link": "https://www.linkedin.com/jobs/view/4331000002",
+    "title": "Registered Nurse",
+    "companyName": "Brightpath Health",
+    "companyLinkedinUrl": null,
+    "location": "Austin, TX",
+    "postedAt": null
+  },
+  {
+    "id": "4331000003",
+    "link": "https://www.linkedin.com/jobs/view/4331000003",
+    "companyName": "No Title Inc",
+    "location": "Pune, India"
+  }
+]

@@ -40,7 +40,7 @@ We do **not** collect job descriptions, years of experience, salary or skills. S
 
 ## Where the jobs come from
 
-- **LinkedIn.** Approved on 25 Nov 2026. We read the public job search without logging in, at most 300 requests a morning, and stop for the day if LinkedIn blocks us.
+- **LinkedIn**, through **Apify** (approved by the lead on 26 Nov 2026). Apify's `curious_coder/linkedin-jobs-scraper` does the scraping on Apify's servers, and we read the results through its API. We use the free plan: 50 jobs a day, about $3 of the $5 monthly free credit. Our own logged-out reader is still there as a fallback (`LINKEDIN_PROVIDER=guest`).
 - **Public company job boards.** Tested and working:
   - Greenhouse
   - Lever

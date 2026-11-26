@@ -37,7 +37,7 @@ OpenRoles is an internal tool that shows Hyring's sales team which companies are
 - **All outbound HTTP goes through `common/http/http-client.ts`** (per-host limits, retry, circuit breaker). Never call `fetch` directly from a reader.
 - **Validate every external response with its zod schema.** Parser tests use saved real responses in `backend/test/fixtures/`.
 - **Finding boards:** the monthly Common Crawl import (`ingestion/board-import.service.ts`) finds Greenhouse, Lever, Ashby and SmartRecruiters boards; the board finder guesses boards for companies we already know. Never probe Workable in bulk (it rate-limits for a day).
-- **LinkedIn:** logged-out guest search only, behind `LINKEDIN_ENABLED`. Never cookies, accounts, proxies or block bypassing.
+- **LinkedIn:** behind `LINKEDIN_ENABLED`. `LINKEDIN_PROVIDER=apify` reads it through the paid Apify actor `curious_coder/linkedin-jobs-scraper` (approved by the lead, 26 Nov 2026), capped by `APIFY_LINKEDIN_DAILY_LIMIT` and `APIFY_MAX_COST_USD`. Never retry the request that starts an Apify run, because a retry can start a second paid run. `guest` is our own logged-out reader. Our own code never uses cookies, accounts, proxies or block bypassing.
 - **Daily fetch:** one `@Cron` in `src/schedule/daily-fetch.scheduler.ts` (06:00 IST) calls `RunOrchestratorService`. Keep run logic in the orchestrator so the cron and the manual script share it. `DISABLE_CRONS=true` switches the cron off on a server, and the FetchRun lease stops double runs across servers.
 - **Dependencies:** no Puppeteer/Playwright, Redis, queues, telemetry SDKs or agent-skill bundles. Ask before adding any dependency not listed in the architecture doc.
 - **Time:** store UTC; compute "today" in Asia/Kolkata.

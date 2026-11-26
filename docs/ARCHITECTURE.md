@@ -86,6 +86,23 @@ Greenhouse, Lever, Ashby and SmartRecruiters have no "list every company" API. T
 - **Politeness:** one request at a time to Common Crawl, 1–2 s apart, slow retries. Board checks go through the normal per-host limits (4 at a time per ATS). Workable is not imported: it rate-limits for a day.
 - **Scale:** `MAX_BOARDS_PER_RUN` default raised to 20,000.
 
+## As built: LinkedIn via Apify (26 Nov 2026)
+The lead approved reading LinkedIn through Apify instead of our own logged-out reader, which gets blocked after about 25 requests.
+- **Who scrapes:** Apify runs `curious_coder/linkedin-jobs-scraper` on its own servers and proxies. We don't scrape LinkedIn: we call Apify's API.
+- **Flow** (`linkedin-apify.service.ts`, used when `LINKEDIN_PROVIDER=apify`):
+  1. `POST /v2/acts/curious_coder~linkedin-jobs-scraper/runs?maxItems={left today}&maxTotalChargeUsd={cap}` with input `{ urls, limitPerSource, scrapeCompany: false }`. The URLs are public job searches for India, the UAE and the US with `f_TPR=r{window}`.
+  2. Wait with `GET /v2/actor-runs/{id}?waitForFinish=60`. If the run is still going after 20 minutes or at the deadline, abort it (results so far are kept).
+  3. `GET /v2/datasets/{id}/items?clean=true`. Each item is checked with zod; bad items are skipped and counted.
+  4. The normal pipeline (country, 30 days, dedupe) saves them as `LINKEDIN` jobs, with the same job ID and link format as our own reader, so both providers dedupe together.
+- **Money guards:**
+  - `APIFY_LINKEDIN_DAILY_LIMIT` (50): jobs per IST day across all runs, counted from today's `FetchRun.stats.linkedin.cards`. Once it's used up, no run starts.
+  - `maxItems` and `maxTotalChargeUsd` (`APIFY_MAX_COST_USD`, $0.15) are passed on every run.
+  - The run start is never retried, so a retry can't start a second paid run.
+  - The Apify free plan also stops at $5 a month.
+- **Price (free plan, read from the API):** $0.002 per job plus $0.00005 per run start. 50 jobs a day costs about $0.10 a day, or about $3 a month. Paid plans pay $0.001 per job.
+- **Token:** `APIFY_TOKEN` in `backend/.env`, sent as a Bearer header, never in a URL.
+- **Data kept:** only our fields. Recruiter names, photos and descriptions from Apify are dropped.
+
 ## 0. Scope
 
 **In scope (v1)**

@@ -55,6 +55,11 @@ const base = (b: BoardLaneStats) => ({
 });
 
 describe('decideStatus', () => {
+  it('PARTIAL when the Apify LinkedIn run had a problem', () => {
+    const stats: Parameters<typeof decideStatus>[0] = base(boards({ read: 10 }));
+    stats.linkedin = { ...stats.linkedin, enabled: true, provider: 'apify', errors: 1 };
+    expect(decideStatus(stats)).toEqual({ status: 'PARTIAL', reasons: ['linkedin_apify_problem'] });
+  });
   it('SUCCESS when a few boards fail (normal noise)', () => {
     expect(decideStatus(base(boards({ failed: 5, read: 95 }))).status).toBe('SUCCESS');
   });

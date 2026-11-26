@@ -46,9 +46,7 @@ export function summaryText(
   const lines = [
     `OpenRoles ${day} · ${status} in ${mins} min · ${fmt(stats.totals.newJobs)} new roles · ${fmt(stats.totals.newCompanies)} new companies`,
     `Boards: ${fmt(b.due)} due · ${fmt(b.read)} read · ${fmt(b.unchanged)} unchanged · ${fmt(b.failed)} failed · ${fmt(b.closed)} jobs closed`,
-    stats.linkedin.enabled
-      ? `LinkedIn: ${fmt(stats.linkedin.requests)} requests · ${fmt(stats.linkedin.cards)} cards · ${stats.linkedin.blocked ? 'BLOCKED' : 'not blocked'}`
-      : 'LinkedIn: off',
+    linkedinLine(stats),
     stats.boardImport
       ? `Board import (Common Crawl): ${fmt(stats.boardImport.boardsFound)} boards found · ${fmt(stats.boardImport.checked)} checked · ${fmt(stats.boardImport.added)} added${stats.boardImport.complete ? '' : ' · not finished, continues next run'}`
       : '',
@@ -60,6 +58,17 @@ export function summaryText(
   if (anomaly)
     lines.push('Alert: far fewer new roles than the recent average. A source may have broken.');
   return lines.filter(Boolean).join('\n');
+}
+
+function linkedinLine(stats: RunStats): string {
+  const l = stats.linkedin;
+  if (!l.enabled) return 'LinkedIn: off';
+  if (l.provider === 'apify') {
+    if (l.dailyLimitReached) return 'LinkedIn (Apify): daily limit already used';
+    const cost = l.costUsd !== undefined ? ` · $${l.costUsd.toFixed(3)}` : '';
+    return `LinkedIn (Apify): ${fmt(l.cards)} jobs · ${fmt(l.new)} new${cost}${l.errors ? ` · ${fmt(l.errors)} problems` : ''}`;
+  }
+  return `LinkedIn: ${fmt(l.requests)} requests · ${fmt(l.cards)} cards · ${l.blocked ? 'BLOCKED' : 'not blocked'}`;
 }
 
 @Injectable()

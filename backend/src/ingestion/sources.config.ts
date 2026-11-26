@@ -32,3 +32,13 @@ export const LINKEDIN_SEARCHES: readonly LinkedInSearch[] = [
  * Never add recruitment agencies: they are customers.
  */
 export const COMPANY_BLOCKLIST: ReadonlySet<string> = new Set<string>([]);
+
+/** The Apify actor that reads LinkedIn for us (LINKEDIN_PROVIDER=apify). */
+export const APIFY_LINKEDIN_ACTOR = 'curious_coder~linkedin-jobs-scraper';
+
+/** Searches sent to Apify. The daily limit is split evenly between them. */
+export const APIFY_LINKEDIN_SEARCHES: readonly { location: string; country: string }[] = [
+  { location: 'India', country: 'IN' },
+  { location: 'United Arab Emirates', country: 'AE' },
+  { location: 'United States', country: 'US' },
+];

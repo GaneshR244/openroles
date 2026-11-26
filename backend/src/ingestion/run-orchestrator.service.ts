@@ -12,6 +12,7 @@ import {
   disabledLinkedInStats,
   type LinkedInStats,
 } from './linkedin-lane.service.js';
+import { LinkedInApifyLaneService } from './linkedin-apify.service.js';
 import { RetentionService } from './retention.service.js';
 import { ReporterService } from './reporter.service.js';
 import { decideStatus, type RunStats } from './run-stats.js';
@@ -57,6 +58,7 @@ export class RunOrchestratorService {
     private readonly finder: BoardFinderService,
     private readonly boardImport: BoardImportService,
     private readonly linkedin: LinkedInLaneService,
+    private readonly linkedinApify: LinkedInApifyLaneService,
     private readonly retention: RetentionService,
     private readonly reporter: ReporterService,
     config: ConfigService,
@@ -100,7 +102,7 @@ export class RunOrchestratorService {
       const [boardsResult, linkedinResult] = await Promise.allSettled([
         this.boardLane.run({ now: startedAt, deadline, only: opts.only }),
         linkedinEnabled
-          ? this.linkedin.run({ now: startedAt, deadline, windowSeconds: seconds })
+          ? this.linkedinLane().run({ now: startedAt, deadline, windowSeconds: seconds })
           : Promise.resolve(disabledLinkedInStats()),
       ]);
       if (boardsResult.status === 'rejected') throw boardsResult.reason;
@@ -171,6 +173,13 @@ export class RunOrchestratorService {
     } finally {
       clearInterval(heartbeat);
     }
+  }
+
+  /** LINKEDIN_PROVIDER picks who reads LinkedIn: Apify (paid, capped daily) or our own reader. */
+  private linkedinLane(): Pick<LinkedInLaneService, 'run'> {
+    return setting(this.config, 'LINKEDIN_PROVIDER') === 'apify'
+      ? this.linkedinApify
+      : this.linkedin;
   }
 
   /** The monthly Common Crawl board import. A failure is logged and never stops the run. */

@@ -35,6 +35,16 @@ export const envSchema = z.object({
   MAX_COMPANY_PROBES: positiveInt(100),
   LINKEDIN_ENABLED: bool,
   LINKEDIN_MAX_REQUESTS: positiveInt(300),
+  /** Who reads LinkedIn: "apify" (curious_coder/linkedin-jobs-scraper, paid per job) or "guest" (our own logged-out reader). */
+  LINKEDIN_PROVIDER: z.enum(['guest', 'apify']).default('guest'),
+  APIFY_TOKEN: z
+    .string()
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+  /** Most LinkedIn jobs taken from Apify per IST day, across all runs (each job costs money). */
+  APIFY_LINKEDIN_DAILY_LIMIT: positiveInt(50),
+  /** Hard spending cap for one Apify run, in US dollars. */
+  APIFY_MAX_COST_USD: z.coerce.number().positive().default(0.15),
   /** true switches off the 06:00 IST fetch inside this API server (same name as mono-backend). */
   DISABLE_CRONS: bool,
   SLACK_WEBHOOK_URL: z

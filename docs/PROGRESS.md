@@ -144,6 +144,18 @@ Asked by the user: remove the country limit, and find "all companies" on Greenho
   - Lever is thin in Common Crawl (196 boards). Scanning more crawls would find more.
   - Normal daily runs should take 10–20 minutes, because quiet boards are read less often.
 
+## LinkedIn through Apify (done, 26 Nov 2026)
+The lead asked to take LinkedIn jobs from Apify (`curious_coder/linkedin-jobs-scraper`) instead of our own reader. We use the free plan.
+- **Built:**
+  - `linkedin-apify.service.ts`: start one capped run, wait, read the dataset, then save through the normal pipeline.
+  - `sources/apify-linkedin.ts`: search links, input, item mapping, daily remaining.
+  - zod schemas for the run and the items, plus an `api.apify.com` host policy.
+- **Settings:** `LINKEDIN_PROVIDER=apify` (local `.env`), `APIFY_TOKEN` (in `.env`, git-ignored), `APIFY_LINKEDIN_DAILY_LIMIT=50`, `APIFY_MAX_COST_USD=0.15`.
+- **Cost:** about $0.10 a day, $3 a month, inside the free $5. The free plan can't overspend.
+- **Tests:** 9 unit tests (input, limits, mapping from a fixture shaped like the actor's sample) and 5 integration tests (capped start never retried, token in a header, saved jobs, today's limit, no token, aborting a stuck run). They use fake Apify responses, so nothing is spent.
+  - Backend totals: 384 unit and 59 integration/API tests, all passing.
+- **Not run live yet,** on purpose. The first real run is the 06:00 IST cron tomorrow (50 jobs, about $0.10). After it, save a real response as the fixture.
+
 ## Not done yet
 - **Deployment:** AWS is decided. The API (with its cron) needs to be deployed as an always-on service.
 - **Sales login:** not wanted for now (user, 25 Nov 2026). The page is view-only.

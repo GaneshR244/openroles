@@ -86,6 +86,7 @@ All settings are in `backend/.env.example` and `frontend/.env.example`. None of 
 - **`TARGET_COUNTRIES`** picks the countries to keep, as ISO codes (`IN,AE,US`). The default `ALL` keeps every country.
 - **`MAX_BOARDS_PER_RUN`** caps the boards read in one run (default 20,000).
 - **`LINKEDIN_ENABLED=true`** reads LinkedIn's logged-out job search (approved). `LINKEDIN_MAX_REQUESTS` caps the requests per morning (default 300). The lane stops for the day if LinkedIn blocks us.
+- **`LINKEDIN_PROVIDER`**: `apify` reads LinkedIn through Apify's `curious_coder/linkedin-jobs-scraper`, paid per job. It needs `APIFY_TOKEN`. `APIFY_LINKEDIN_DAILY_LIMIT` (default 50) caps the jobs per day and `APIFY_MAX_COST_USD` caps each run. `guest` is our own free logged-out reader.
 - **`DISABLE_CRONS=true`** stops this API server from running the 06:00 IST fetch (default: it runs).
 
 ## Deploying (not done yet)

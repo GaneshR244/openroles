@@ -13,6 +13,7 @@ import { BoardLaneService } from './board-lane.service.js';
 import { BoardFinderService } from './board-finder.service.js';
 import { BoardImportService } from './board-import.service.js';
 import { LinkedInLaneService } from './linkedin-lane.service.js';
+import { LinkedInApifyLaneService } from './linkedin-apify.service.js';
 import { RetentionService } from './retention.service.js';
 import { ReporterService } from './reporter.service.js';
 import { RunOrchestratorService } from './run-orchestrator.service.js';
@@ -35,6 +36,7 @@ import { YcImportService } from './yc-import.service.js';
     BoardFinderService,
     BoardImportService,
     LinkedInLaneService,
+    LinkedInApifyLaneService,
     RetentionService,
     ReporterService,
     RunOrchestratorService,

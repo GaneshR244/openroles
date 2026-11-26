@@ -128,3 +128,26 @@ export const cdxPagesSchema = z.object({ pages: z.number().int().nonnegative() }
 
 /** One line of a CDX index page asked for with `output=json&fl=url`. */
 export const cdxRecordSchema = z.object({ url: z.string().min(1) });
+
+/** Apify API: a run, as returned when it starts and while we wait for it. */
+export const apifyRunSchema = z.object({
+  data: z.object({
+    id: z.string().min(1),
+    status: z.string().min(1),
+    defaultDatasetId: z.string().min(1),
+    usageTotalUsd: z.number().nullish(),
+  }),
+});
+
+/** One LinkedIn job from curious_coder/linkedin-jobs-scraper (only the fields we keep). */
+export const apifyLinkedInJobSchema = z.object({
+  id: z.union([z.string().min(1), z.number()]).transform(String),
+  title: z.string().min(1),
+  companyName: text,
+  companyLinkedinUrl: text,
+  location: text,
+  link: text,
+  postedAt: text,
+  postedAtTimestamp: z.number().nullish(),
+});
+export type ApifyLinkedInJob = z.output<typeof apifyLinkedInJobSchema>;

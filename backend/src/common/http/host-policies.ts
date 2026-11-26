@@ -57,6 +57,13 @@ const HOST_POLICIES: Record<string, HostPolicy> = {
   'api.smartrecruiters.com': ATS_API,
   'apply.workable.com': WORKABLE,
   'yc-oss.github.io': { concurrency: 1, minGapMs: 0, userAgent: OPENROLES_USER_AGENT },
+  /** Apify's API (LinkedIn jobs via a paid actor). Starting a run is never retried (see the lane). */
+  'api.apify.com': {
+    concurrency: 2,
+    minGapMs: 200,
+    breaker: true,
+    userAgent: OPENROLES_USER_AGENT,
+  },
   /** Common Crawl's index is a shared free service: one request at a time, slow retries. */
   'index.commoncrawl.org': {
     concurrency: 1,

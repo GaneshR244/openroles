@@ -36,6 +36,9 @@ export function decideStatus(stats: Omit<RunStats, 'durationMs' | 'partialReason
     reasons.push('deadline');
   }
   if (stats.linkedin.blocked) reasons.push('linkedin_blocked');
+  if (stats.linkedin.provider === 'apify' && stats.linkedin.errors > 0) {
+    reasons.push('linkedin_apify_problem');
+  }
   if (stats.boardImport && !stats.boardImport.complete) reasons.push('board_import_unfinished');
   if (due > 0 && failed / due > BOARD_FAILURE_PARTIAL_SHARE) reasons.push('many_board_failures');
   const nothingWorked =

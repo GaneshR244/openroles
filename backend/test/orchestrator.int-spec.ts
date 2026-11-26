@@ -7,6 +7,7 @@ import {
   disabledLinkedInStats,
 } from '../src/ingestion/linkedin-lane.service.js';
 import { JobStoreService } from '../src/ingestion/job-store.service.js';
+import { LinkedInApifyLaneService } from '../src/ingestion/linkedin-apify.service.js';
 import { RetentionService } from '../src/ingestion/retention.service.js';
 import { ReporterService } from '../src/ingestion/reporter.service.js';
 import { RunOrchestratorService } from '../src/ingestion/run-orchestrator.service.js';
@@ -60,6 +61,10 @@ describe('RunOrchestratorService (integration, real PostgreSQL)', () => {
       { provide: BoardFinderService, useValue: finder },
       { provide: BoardImportService, useValue: boardImport },
       { provide: LinkedInLaneService, useValue: { run: async () => disabledLinkedInStats() } },
+      {
+        provide: LinkedInApifyLaneService,
+        useValue: { run: async () => disabledLinkedInStats() },
+      },
     ]);
     orchestrator = moduleRef.get(RunOrchestratorService);
     prisma = moduleRef.get(PrismaService);

@@ -28,6 +28,12 @@ export type LinkedInStats = {
   /** LinkedIn refused us (rate limit or bot check); the lane stopped for the day. */
   blocked: boolean;
   errors: number;
+  /** Who read LinkedIn. Missing on older runs, which were all "guest". */
+  provider?: 'guest' | 'apify';
+  /** Apify only: what the run cost, in US dollars, when Apify reports it. */
+  costUsd?: number;
+  /** Apify only: today's job limit was already used, so no run was started. */
+  dailyLimitReached?: boolean;
 };
 
 export function disabledLinkedInStats(): LinkedInStats {
@@ -81,7 +87,7 @@ export class LinkedInLaneService {
   }): Promise<LinkedInStats> {
     if (!setting(this.config, 'LINKEDIN_ENABLED')) return disabledLinkedInStats();
 
-    const stats: LinkedInStats = { ...disabledLinkedInStats(), enabled: true };
+    const stats: LinkedInStats = { ...disabledLinkedInStats(), enabled: true, provider: 'guest' };
     const targets = new Set<string>(setting(this.config, 'TARGET_COUNTRIES'));
     const budget = setting(this.config, 'LINKEDIN_MAX_REQUESTS');
     const states: SearchState[] = [...(opts.searches ?? LINKEDIN_SEARCHES)]
