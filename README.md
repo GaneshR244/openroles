@@ -93,5 +93,5 @@ All settings are in `backend/.env.example` and `frontend/.env.example`. None of 
 - **Target: AWS.**
 - **`backend/Dockerfile`** builds one image. Run `npx prisma migrate deploy` once per release, then start the API (`node dist/main.js`) as an always-on service. It also runs the 06:00 IST fetch.
 - **The frontend** can go on Vercel or the same host.
-- **CI** (`.github/workflows/ci.yml`) lints, typechecks, tests and builds both apps.
+- **No CI pipeline** (removed 26 Nov 2026, not needed). Run the checks locally before pushing (see Scripts).
 - **Still to decide:** how salespeople log in.

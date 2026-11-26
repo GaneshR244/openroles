@@ -600,7 +600,7 @@ No job source needs an API key.
 - **Backend image:** a multi-stage Dockerfile. The same image runs the API (`node dist/main.js`) and the script (`node dist/scripts/fetch-jobs.js`). `prisma migrate deploy` runs on release.
 - **Cron:** `@Cron('0 0 6 * * *', { timeZone: 'Asia/Kolkata' })` inside the API (see "As built: daily schedule"). Hosting is AWS: run the API as an always-on service (ECS or EC2), never a serverless function. With several API servers, set `DISABLE_CRONS=true` on all but one; the lease makes it safe either way.
 - **Frontend:** Vercel or the same host.
-- **CI (GitHub Actions):** install → lint → typecheck → test (Postgres service) → build, for both apps.
+- **CI:** none (the GitHub Actions workflow was removed on 26 Nov 2026 at the user's request). Run lint, typecheck, tests and build locally before pushing.
 
 ## 6. Observability and alerts
 - **FetchRun row:** written every run; it powers the banner and the run history.
